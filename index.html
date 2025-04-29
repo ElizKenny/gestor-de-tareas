@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>Rastreo de Hábitos</title>
+
+  <!-- Fuentes -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="container">
@@ -16,43 +20,40 @@
       <p class="intro-text">Recuerda que la clave para el éxito es la constancia. ¡Buena suerte!</p>
     </header>
 
-    <!-- Sección de explicaciones (desplegables) -->
+    <!-- Acordeones -->
     <section class="intro">
-      <h2 class="accordion">¿Qué es el rastreo de hábitos? 👇</h2>
+      <button class="accordion">¿Qué es el rastreo de hábitos? 👇</button>
       <div class="panel">
-        <p>El rastreo de hábitos es una excelente forma de mejorar tu vida diaria. Puedes establecer metas, monitorear tu progreso y lograr un cambio significativo en tu rutina diaria. Se cree que, para que un hábito se afiance de manera efectiva, es necesario sostenerlo durante al menos 21 días consecutivos. Esto permite que la acción se convierta en una parte natural de tu vida, mejorando tu bienestar físico, emocional y mental a largo plazo.</p>
+        <p>
+          El rastreo de hábitos es una excelente forma de mejorar tu vida diaria. Mantener la práctica durante
+          <strong>21 días consecutivos</strong> ayuda a que el hábito se consolide y pase a ser automático.
+        </p>
       </div>
 
-      <h2 class="accordion">Empieza tu viaje 👇</h2>
+      <button class="accordion">Empieza tu viaje 👇</button>
       <div class="panel">
-        <p>Comienza escribiendo un hábito que te gustaría rastrear y haz clic en <strong>"Añadir hábito"</strong> para empezar.</p>
+        <p>Escribe un hábito y pulsa <strong>“Añadir hábito”</strong>. Dispondrás de 21 casillas —una por día— que puedes
+          marcar según cumplas la rutina.</p>
       </div>
     </section>
 
-    <!-- Formulario para agregar un nuevo hábito -->
+    <!-- Formulario -->
     <section class="habit-form-container">
       <div class="habit-form">
-        <input type="text" id="habitInput" placeholder="Nuevo hábito" />
+        <input id="habitInput" type="text" placeholder="Nuevo hábito (Ej: Meditar 10 min)" />
         <button id="addHabitButton" class="add-habit-btn">Añadir hábito</button>
       </div>
     </section>
 
-    <!-- Sección para mostrar los hábitos y sus días -->
-    <section id="habitTracker">
-      <div id="habitList" class="habit-list"></div>
-    </section>
+    <!-- Lista de hábitos -->
+    <section id="habitList" class="habit-list"></section>
 
-    <!-- Calendario complementario de 21 días -->
-    <section id="calendarSection">
-      <h2>Calendario de 21 días</h2>
-      <div id="calendarContainer" class="calendar-container"></div>
-    </section>
+    <!-- Hoy -->
+    <p id="todayLabel" class="today-label"></p>
   </div>
 
   <footer class="footer">
-    <p>Creado con ❤️ para ayudar a quienes buscan ser mejores consigo mismos. <br>
-      Visita mi página web: <a href="https://elikenny.com" target="_blank">elikenny.com</a>
-    </p>
+    <p>Creado con ❤️. Visita <a href="https://elikenny.com" target="_blank">elikenny.com</a></p>
   </footer>
 
   <script src="script.js"></script>
