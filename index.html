@@ -6,29 +6,52 @@
   <title>Rastreo de Hábitos</title>
 
   <!-- Fuentes -->
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <div class="container">
     <header>
       <h1>Rastrea tus Hábitos</h1>
-      <p class="intro-text">🌱 ¡Bienvenido al rastreador de hábitos! 🙏</p>
-      <p class="intro-text">Añade y sigue tus hábitos diarios. ¡Comienza tu viaje hacia una vida más saludable y productiva!</p>
-      <p class="intro-text">Recuerda que la constancia es la clave. ¡Mucho éxito!</p>
+      <p class="intro-text">🌱 ¡Bienvenido a tu rastreador de hábitos! 🙏</p>
+      <p class="intro-text">
+        Diseñado para que conviertas tus buenas intenciones en acciones diarias.
+        Cada marca refleja tu <strong>disciplina</strong> y el propósito que te impulsa.
+      </p>
+      <p class="intro-text">Sé constante, avanza un día a la vez y celebra cada logro.</p>
     </header>
 
     <!-- Acordeones -->
     <section class="intro">
-      <button class="accordion">¿Qué es el rastreo de hábitos? 👇</button>
+      <button class="accordion">¿Por qué rastrear hábitos? 👇</button>
       <div class="panel">
-        <p>Registrar tus hábitos durante <strong>21 días</strong> ayuda a consolidarlos; mantenerlos <strong>60 días</strong> los vuelve parte de tu identidad.</p>
+        <p>
+          <strong>Propósito:</strong> apuntar tu progreso te mantiene enfocado.<br>
+          <strong>Disciplina:</strong> un historial visible refuerza tu compromiso.<br>
+          <strong>Logro:</strong> cada casilla marcada alimenta tu motivación.
+        </p>
       </div>
 
-      <button class="accordion">Empieza tu viaje 👇</button>
+      <button class="accordion">El poder del día 21 👇</button>
       <div class="panel">
-        <p>Escribe tu hábito y, si quieres, una breve descripción. Tendrás 60 casillas para marcar; la <strong>#21</strong> resaltará el primer hito.</p>
+        <p>Veintiún días de práctica continua consolidan la base neuronal del hábito; por eso la casilla <strong>21</strong> se resalta.</p>
+      </div>
+
+      <button class="accordion">Dominar en 60 días 👇</button>
+      <div class="panel">
+        <p>Extender la práctica hasta <strong>60 días</strong> refuerza la habilidad y la vuelve más natural.</p>
+      </div>
+
+      <button class="accordion">Cómo empezar 👇</button>
+      <div class="panel">
+        <p>
+          1. Escribe tu hábito y, si quieres, una breve descripción.<br>
+          2. Marca la casilla del día cuando completes la tarea.<br>
+          3. Celebra al llegar al día 21 y usa ese impulso para avanzar hasta los 60.<br>
+          4. Edita o elimina hábitos según evolucionen tus metas.
+        </p>
       </div>
     </section>
 
@@ -36,21 +59,19 @@
     <section class="habit-form-container">
       <div class="habit-form">
         <input id="habitInput" type="text" placeholder="Nuevo hábito (Ej: Meditar 10 min)" />
-        <input id="descInput" type="text" placeholder="Descripción / Propósito (opcional)" />
+        <input id="descInput"  type="text" placeholder="Descripción / Propósito (opcional)" />
         <button id="addHabitButton" class="add-habit-btn">Añadir hábito</button>
       </div>
     </section>
 
-    <!-- Lista de hábitos -->
+    <!-- Lista -->
     <section id="habitList" class="habit-list"></section>
 
-    <!-- Hoy -->
     <p id="todayLabel" class="today-label"></p>
   </div>
 
   <footer class="footer">
-    <p>Creado con ❤️ para crecer juntos hacia nuestra mejor versión.</p>
-    <p><a href="https://elikenny.com" target="_blank">elikenny</a></p>
+    <p>Creado con ❤️ para crecer juntos hacia nuestra mejor versión. Por <a href="https://elikenny.com" target="_blank">elikenny.com</a></p>
   </footer>
 
   <script src="script.js"></script>
