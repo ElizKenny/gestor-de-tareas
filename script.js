@@ -2,13 +2,23 @@ const habitInput = document.getElementById('habitInput');
 const addHabitButton = document.getElementById('addHabitButton');
 const habitList = document.getElementById('habitList');
 
-// Cargar hábitos guardados
-function loadHabits() {
-  const savedHabits = JSON.parse(localStorage.getItem('habits')) || [];
-  savedHabits.forEach(habit => {
-    createHabit(habit.name, habit.days);
-  });
-}
+// Iniciar FullCalendar
+const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+  initialView: 'dayGridMonth', // Vista por defecto del calendario
+  headerToolbar: {
+    left: 'prev,next today',
+    center: 'title',
+    right: 'dayGridMonth,dayGridWeek,dayGridDay'
+  },
+  events: [], // Inicialmente sin eventos
+  editable: true, // Permitir mover y cambiar eventos
+  droppable: true, // Permitir arrastrar eventos
+  dateClick: function(info) {
+    alert('Fecha clickeada: ' + info.dateStr);
+  }
+});
+
+calendar.render(); // Renderiza el calendario en la página
 
 // Guardar hábitos en el almacenamiento local
 function saveHabits() {
@@ -22,32 +32,16 @@ function saveHabits() {
 }
 
 // Función para crear el calendario para cada hábito
-function createCalendar(habitName, completedDays = []) {
-  const calendarDiv = document.createElement('div');
-  calendarDiv.classList.add('calendar');
-  calendarDiv.setAttribute('id', `calendar-${habitName}`);
+function createCalendarEvent(habitName) {
+  // Aquí agregamos el evento al calendario de FullCalendar
+  calendar.addEvent({
+    title: habitName,
+    start: new Date(), // Fecha actual
+    allDay: true, // Evento todo el día
+    color: '#f39c12' // Color para diferenciarlo
+  });
 
-  const totalDays = 30;  // Número de días (puedes cambiarlo a más si lo deseas)
-  
-  for (let day = 1; day <= totalDays; day++) {
-    const dayElement = document.createElement('div');
-    dayElement.classList.add('day');
-    dayElement.textContent = day;
-
-    // Marcar los días completados al cargar
-    if (completedDays.includes(day)) {
-      dayElement.classList.add('completed');
-    }
-
-    dayElement.addEventListener('click', () => {
-      dayElement.classList.toggle('completed');
-      saveHabits();  // Guardar después de cada cambio
-    });
-
-    calendarDiv.appendChild(dayElement);
-  }
-
-  return calendarDiv;
+  saveHabits(); // Guardar el hábito después de agregarlo
 }
 
 // Función para agregar un nuevo hábito
@@ -55,35 +49,10 @@ function addHabit() {
   const habitName = habitInput.value.trim();
   
   if (habitName) {
-    const habitDiv = document.createElement('div');
-    habitDiv.classList.add('habit');
-    habitDiv.innerHTML = `<h3>${habitName}</h3>`;
+    createCalendarEvent(habitName);
 
-    // Crear el calendario para el hábito
-    const calendar = createCalendar(habitName);
-    habitDiv.appendChild(calendar);
-
-    // Botón para eliminar el hábito
-    const deleteButton = document.createElement('button');
-    deleteButton.classList.add('delete-btn');
-    deleteButton.textContent = 'Eliminar';
-    deleteButton.addEventListener('click', () => {
-      habitDiv.remove();
-      saveHabits();  // Guardar después de eliminar un hábito
-    });
-    habitDiv.appendChild(deleteButton);
-
-    habitList.appendChild(habitDiv);
-    
     // Limpiar el campo de entrada
     habitInput.value = '';
-    saveHabits();  // Guardar los hábitos después de agregar uno nuevo
-
-    // Expandir la página para mostrar el nuevo hábito
-    window.scrollTo({
-      top: document.body.scrollHeight,
-      behavior: 'smooth'
-    });
   } else {
     alert('Por favor ingresa un nombre para el hábito');
   }
@@ -91,15 +60,17 @@ function addHabit() {
 
 // Evento para agregar el hábito cuando se hace clic en el botón
 addHabitButton.addEventListener('click', addHabit);
-
-// Cargar los hábitos cuando se carga la página
-window.onload = loadHabits;
-
-// Acordeón para mostrar/ocultar las ideas de hábitos
-const accordion = document.querySelectorAll('.accordion');
-accordion.forEach(button => {
-  button.addEventListener('click', () => {
-    const panel = button.nextElementSibling;
-    panel.style.display = panel.style.display === "block" ? "none" : "block";
+// Evento para agregar el hábito cuando se presiona Enter en el campo de entrada
+habitInput.addEventListener('keypress', function(event) {
+  if (event.key === 'Enter') {
+    addHabit();
+  }
+});
+// Cargar hábitos desde el almacenamiento local al cargar la página
+window.addEventListener('load', function() {
+  const savedHabits = JSON.parse(localStorage.getItem('habits')) || [];
+  savedHabits.forEach(habit => {
+    createCalendarEvent(habit.name);
   });
 });
+// Función para marcar un día como completado           
