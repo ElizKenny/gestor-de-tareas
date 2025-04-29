@@ -8,9 +8,9 @@
 \f0\fs24 \cf0 // Obtenci\'f3n de elementos del DOM\
 const taskInput = document.getElementById('taskInput');\
 const addTaskButton = document.getElementById('addTaskButton');\
-const calendar = document.getElementById('calendar');\
+const taskList = document.getElementById('taskList');\
 \
-// Funci\'f3n para crear una tarea en el calendario\
+// Funci\'f3n para crear una tarea en la lista\
 function createTask(taskContent) \{\
   const task = document.createElement('div');\
   task.classList.add('task');\
@@ -21,7 +21,7 @@ function createTask(taskContent) \{\
     task.classList.toggle('completed');\
   \});\
 \
-  calendar.appendChild(task);\
+  taskList.appendChild(task);\
 \}\
 \
 // Agregar tarea al presionar el bot\'f3n\

@@ -5,7 +5,8 @@
 \paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 
-\f0\fs24 \cf0 * \{\
+\f0\fs24 \cf0 /* Estilo base */\
+* \{\
   margin: 0;\
   padding: 0;\
   box-sizing: border-box;\
@@ -49,8 +50,9 @@ button:hover \{\
   background-color: #4cae4c;\
 \}\
 \
-#calendar \{\
+.task-list \{\
   margin-top: 20px;\
+  text-align: left;\
 \}\
 \
 .task \{\
@@ -58,7 +60,6 @@ button:hover \{\
   background-color: #e9ecef;\
   margin: 5px;\
   border-radius: 4px;\
-  display: inline-block;\
   cursor: pointer;\
 \}\
 \
