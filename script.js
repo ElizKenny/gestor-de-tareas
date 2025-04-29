@@ -1,7 +1,15 @@
 const habitInput = document.getElementById('habitInput');
 const addHabitButton = document.getElementById('addHabitButton');
 const habitList = document.getElementById('habitList');
-const habitDates = document.getElementById('habitDates');
+
+// Mostrar y ocultar los desplegables
+document.querySelectorAll('.accordion').forEach((accordion) => {
+  accordion.addEventListener('click', function() {
+    this.classList.toggle('active');
+    const panel = this.nextElementSibling;
+    panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+  });
+});
 
 // Función para agregar un hábito
 function addHabit() {
@@ -13,10 +21,11 @@ function addHabit() {
     habitDiv.innerHTML = `
       <h3>${habitName}</h3>
       <div class="habit-dates">
-        ${[...Array(7).keys()].map(i => {
+        ${[...Array(21).keys()].map(i => {
           return `<span class="date" data-habit="${habitName}">${i + 1}</span>`;
         }).join('')}
       </div>
+      <button class="delete-btn" onclick="deleteHabit('${habitName}')">Eliminar</button>
     `;
     habitList.appendChild(habitDiv);
 
@@ -28,6 +37,17 @@ function addHabit() {
   } else {
     alert('Por favor ingresa un nombre para el hábito');
   }
+}
+
+// Función para eliminar un hábito
+function deleteHabit(habitName) {
+  const habits = JSON.parse(localStorage.getItem('habits'));
+  const updatedHabits = habits.filter(habit => habit.habitName !== habitName);
+  localStorage.setItem('habits', JSON.stringify(updatedHabits));
+
+  // Eliminar el hábito de la interfaz
+  const habitDiv = document.querySelector(`.habit h3:contains('${habitName}')`).parentNode;
+  habitList.removeChild(habitDiv);
 }
 
 // Evento para agregar el hábito cuando se hace clic en el botón
@@ -61,11 +81,12 @@ function loadHabits() {
       habitDiv.innerHTML = `
         <h3>${habit.habitName}</h3>
         <div class="habit-dates">
-          ${[...Array(7).keys()].map(i => {
+          ${[...Array(21).keys()].map(i => {
             const completed = habit.completedDates.includes((i + 1).toString()) ? 'completed' : '';
             return `<span class="date ${completed}" data-habit="${habit.habitName}">${i + 1}</span>`;
           }).join('')}
         </div>
+        <button class="delete-btn" onclick="deleteHabit('${habit.habitName}')">Eliminar</button>
       `;
       habitList.appendChild(habitDiv);
     });
@@ -76,19 +97,20 @@ function loadHabits() {
 document.addEventListener('DOMContentLoaded', loadHabits);
 
 // Marcar días como completados
-habitDates.addEventListener('click', function(event) {
+habitList.addEventListener('click', function(event) {
   if (event.target.classList.contains('date')) {
     event.target.classList.toggle('completed');
     saveHabits();
   }
 });
-// Función para eliminar un hábito
-function deleteHabit(habitName) {
-  const habitItems = document.querySelectorAll('.habit');
-  habitItems.forEach(habitItem => {
-    if (habitItem.querySelector('h3').textContent === habitName) {
-      habitItem.remove();
-    }
-  });
-  saveHabits();
+// Función para mostrar un mensaje de alerta
+function showAlert(message) {
+  const alertBox = document.createElement('div');
+  alertBox.className = 'alert';
+  alertBox.textContent = message;
+  document.body.appendChild(alertBox);
+  
+  setTimeout(() => {
+    alertBox.remove();
+  }, 3000);
 }
