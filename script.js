@@ -14,14 +14,19 @@ const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), 
   editable: true, // Permitir mover y cambiar eventos
   droppable: true, // Permitir arrastrar eventos
   dateClick: function(info) {
-    // Aquí puedes agregar la funcionalidad de tachar el día
-    let dayEvent = calendar.getEventById(info.dateStr);
-    if (!dayEvent) {
+    // Marcar el día como completado o tachado
+    const clickedDate = info.dateStr;
+    let dayEvent = calendar.getEventById(clickedDate);
+    
+    if (dayEvent) {
+      dayEvent.remove();  // Si ya está marcado, eliminarlo
+    } else {
       calendar.addEvent({
-        title: 'Hábito',
-        start: info.dateStr,
+        id: clickedDate, // Usamos la fecha como ID único
+        title: 'Hábito Completado',
+        start: clickedDate,
         allDay: true,
-        color: '#f39c12'
+        color: '#2ecc71' // Verde para indicar completado
       });
     }
   }
@@ -61,12 +66,7 @@ function addHabit() {
 
 // Evento para agregar el hábito cuando se hace clic en el botón
 addHabitButton.addEventListener('click', addHabit);
-// Evento para agregar el hábito cuando se presiona Enter
-habitInput.addEventListener('keypress', function(event) {
-  if (event.key === 'Enter') {
-    addHabit();
-  }
-});
+
 // Función para guardar los hábitos en el almacenamiento local
 function saveHabits() {
   const habits = [];
@@ -79,6 +79,7 @@ function saveHabits() {
   });
   localStorage.setItem('habits', JSON.stringify(habits));
 }
+
 // Función para cargar los hábitos desde el almacenamiento local
 function loadHabits() {
   const habits = JSON.parse(localStorage.getItem('habits'));
@@ -88,52 +89,19 @@ function loadHabits() {
         title: habit.title,
         start: new Date(habit.start),
         allDay: habit.allDay,
-        color: '#f39c12'
+        color: '#f39c12' // Color para los hábitos
       });
     });
   }
 }
+
 // Cargar los hábitos al cargar la página
 document.addEventListener('DOMContentLoaded', loadHabits);
 // Función para eliminar un hábito
 function deleteHabit(habitId) {
-  const habit = calendar.getEventById(habitId);
-  if (habit) {
-    habit.remove();
+  const habitToDelete = calendar.getEventById(habitId);
+  if (habitToDelete) {
+    habitToDelete.remove();
     saveHabits(); // Guardar cambios después de eliminar
   }
 }
-// Evento para eliminar un hábito al hacer clic en el botón de eliminar
-habitList.addEventListener('click', function(event) {
-  if (event.target.classList.contains('deleteHabitButton')) {
-    const habitId = event.target.dataset.habitId;
-    deleteHabit(habitId);
-  }
-});
-// Función para mostrar la lista de hábitos
-function showHabitList() {
-  const habits = JSON.parse(localStorage.getItem('habits'));
-  habitList.innerHTML = ''; // Limpiar la lista antes de mostrarla
-  if (habits) {
-    habits.forEach((habit, index) => {
-      const li = document.createElement('li');
-      li.textContent = habit.title;
-      li.innerHTML += `<button class="deleteHabitButton" data-habit-id="${index}">Eliminar</button>`;
-      habitList.appendChild(li);
-    });
-  }
-}
-// Mostrar la lista de hábitos al cargar la página
-document.addEventListener('DOMContentLoaded', showHabitList);
-// Función para mostrar el calendario al hacer clic en el botón
-document.getElementById('showCalendarButton').addEventListener('click', function() {
-  document.getElementById('calendarContainer').style.display = 'block';
-});
-
-// Función para ocultar el calendario al hacer clic fuera de él
-document.addEventListener('click', function(event) {
-  const calendarContainer = document.getElementById('calendarContainer');
-  if (!calendarContainer.contains(event.target) && event.target.id !== 'showCalendarButton') {
-    calendarContainer.style.display = 'none';
-  }
-});
