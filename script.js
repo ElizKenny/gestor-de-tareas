@@ -27,7 +27,7 @@ function createCalendar(habitName, completedDays = []) {
   calendarDiv.classList.add('calendar');
   calendarDiv.setAttribute('id', `calendar-${habitName}`);
 
-  const totalDays = 30; // Número de días (puedes cambiarlo)
+  const totalDays = 30;  // Número de días (puedes cambiarlo)
   
   for (let day = 1; day <= totalDays; day++) {
     const dayElement = document.createElement('div');
@@ -97,4 +97,3 @@ accordion.forEach(button => {
     panel.style.display = panel.style.display === "block" ? "none" : "block";
   });
 });
-// Función para mostrar un mensaje de éxito al guardar    
