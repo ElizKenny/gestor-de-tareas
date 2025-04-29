@@ -16,20 +16,15 @@ const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), 
   dateClick: function(info) {
     // Marcar el día como completado o tachado (con un color de fondo)
     const clickedDate = info.dateStr;
-    let dayEvent = calendar.getEventById(clickedDate);
+    const dayElement = document.querySelector(`.fc-day[data-date="${clickedDate}"]`);
     
-    if (dayEvent) {
-      // Si ya está marcado, eliminarlo
-      dayEvent.remove();  
-    } else {
-      // Crear un evento (marca el día como "completado")
-      calendar.addEvent({
-        id: clickedDate, // Usamos la fecha como ID único
-        title: 'Hábito Completado',
-        start: clickedDate,
-        allDay: true,
-        color: '#2ecc71' // Verde para indicar completado
-      });
+    // Verificar si ya está marcado y cambiar el color de fondo
+    if (dayElement) {
+      if (dayElement.classList.contains('completed')) {
+        dayElement.classList.remove('completed');  // Desmarcar el día
+      } else {
+        dayElement.classList.add('completed');  // Marcar el día como completado
+      }
     }
   }
 });
@@ -99,17 +94,3 @@ function loadHabits() {
 
 // Cargar los hábitos al cargar la página
 document.addEventListener('DOMContentLoaded', loadHabits);
-
-// Desplegables para "¿Qué es el rastreo de hábitos?" y "Empieza tu viaje"
-const accordions = document.querySelectorAll('.accordion');
-accordions.forEach((accordion) => {
-  accordion.addEventListener('click', function() {
-    this.classList.toggle('active');
-    const panel = this.nextElementSibling;
-    if (panel.style.display === "block") {
-      panel.style.display = "none";
-    } else {
-      panel.style.display = "block";
-    }
-  });
-});
