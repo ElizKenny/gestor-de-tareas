@@ -19,7 +19,7 @@ body {
   color: #333;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center; /* Centrado vertical */
   min-height: 100vh;
   flex-direction: column;
   padding: 20px;
@@ -154,9 +154,8 @@ button:hover {
   margin-top: 50px;
   text-align: center;
   font-size: 0.9rem;
-  color: white;
   padding: 20px;
-  background-color: #757575; /* Fondo gris más oscuro */
+  background-color: #d4d4d4; /* Fondo gris más oscuro */
   z-index: 10;
 }
 

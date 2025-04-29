@@ -14,11 +14,31 @@ const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), 
   editable: true, // Permitir mover y cambiar eventos
   droppable: true, // Permitir arrastrar eventos
   dateClick: function(info) {
-    alert('Fecha clickeada: ' + info.dateStr);
+    // Aquí puedes agregar la funcionalidad de tachar el día
+    let dayEvent = calendar.getEventById(info.dateStr);
+    if (!dayEvent) {
+      calendar.addEvent({
+        title: 'Hábito',
+        start: info.dateStr,
+        allDay: true,
+        color: '#f39c12'
+      });
+    }
   }
 });
 
 calendar.render(); // Renderiza el calendario en la página
+
+// Guardar hábitos en el almacenamiento local
+function saveHabits() {
+  const habits = [];
+  document.querySelectorAll('.habit').forEach(habitElement => {
+    const habitName = habitElement.querySelector('h3').textContent;
+    const completedDays = Array.from(habitElement.querySelectorAll('.day.completed')).map(day => parseInt(day.textContent));
+    habits.push({ name: habitName, days: completedDays });
+  });
+  localStorage.setItem('habits', JSON.stringify(habits));
+}
 
 // Función para crear el calendario para cada hábito
 function createCalendarEvent(habitName) {
@@ -52,94 +72,3 @@ function addHabit() {
 
 // Evento para agregar el hábito cuando se hace clic en el botón
 addHabitButton.addEventListener('click', addHabit);
-// Evento para agregar el hábito cuando se presiona Enter
-habitInput.addEventListener('keypress', function(event) {
-  if (event.key === 'Enter') {
-    addHabit();
-  }
-});
-// Función para guardar los hábitos en el almacenamiento local
-function saveHabits() {
-  const habits = [];
-  const events = calendar.getEvents();
-  
-  events.forEach(event => {
-    habits.push({
-      title: event.title,
-      start: event.start.toISOString(),
-      allDay: event.allDay
-    });
-  });
-
-  localStorage.setItem('habits', JSON.stringify(habits));
-}
-// Función para cargar los hábitos desde el almacenamiento local
-function loadHabits() {
-  const habits = JSON.parse(localStorage.getItem('habits'));
-  
-  if (habits) {
-    habits.forEach(habit => {
-      calendar.addEvent({
-        title: habit.title,
-        start: new Date(habit.start),
-        allDay: habit.allDay,
-        color: '#f39c12'
-      });
-    });
-  }
-}
-// Cargar los hábitos al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
-  loadHabits();
-});
-// Función para eliminar un hábito
-function deleteHabit(habitName) {
-  const events = calendar.getEvents();
-  
-  events.forEach(event => {
-    if (event.title === habitName) {
-      event.remove(); // Eliminar el evento del calendario
-    }
-  });
-
-  saveHabits(); // Guardar los cambios
-}
-// Evento para eliminar un hábito al hacer clic en el botón de eliminar
-habitList.addEventListener('click', function(event) {
-  if (event.target.classList.contains('deleteHabitButton')) {
-    const habitName = event.target.parentElement.querySelector('.habitName').textContent;
-    deleteHabit(habitName);
-    event.target.parentElement.remove(); // Eliminar el elemento de la lista
-  }
-});
-// Función para mostrar la lista de hábitos
-function showHabitList() {
-  const habits = JSON.parse(localStorage.getItem('habits'));
-  
-  if (habits) {
-    habitList.innerHTML = ''; // Limpiar la lista antes de mostrarla
-    habits.forEach(habit => {
-      const li = document.createElement('li');
-      li.innerHTML = `<span class="habitName">${habit.title}</span> <button class="deleteHabitButton">Eliminar</button>`;
-      habitList.appendChild(li);
-    });
-  }
-}
-// Mostrar la lista de hábitos al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
-  showHabitList();
-});
-// Función para mostrar el calendario al hacer clic en un hábito
-habitList.addEventListener('click', function(event) {
-  if (event.target.classList.contains('habitName')) {
-    const habitName = event.target.textContent;
-    const events = calendar.getEvents();
-    
-    events.forEach(event => {
-      if (event.title === habitName) {
-        calendar.gotoDate(event.start); // Ir a la fecha del evento
-        calendar.changeView('dayGridDay'); // Cambiar a vista de día
-      }
-    });
-  }
-});
