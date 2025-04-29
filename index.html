@@ -8,17 +8,35 @@
 </head>
 <body>
   <div class="container">
-    <h1>Rastreo de Hábitos</h1>
-    
-    <!-- Formulario para agregar un nuevo hábito -->
-    <div class="habit-form">
-      <input type="text" id="habitInput" placeholder="Nuevo hábito (Ej: Meditar)" />
-      <button id="addHabitButton">Añadir hábito</button>
-    </div>
+    <header>
+      <h1>Rastrea tus Hábitos</h1>
+      <p>¡Bienvenido al rastreador de hábitos! 🙏 Aquí podrás añadir y seguir tus hábitos diarios.</p>
+      <p>Comienza escribiendo un hábito que te gustaría rastrear y haz clic en <strong>"Añadir hábito"</strong>.</p>
+      <p><em>¡Recuerda! La clave del éxito es la constancia y la disciplina. ¡Tú puedes hacerlo!</em></p>
+    </header>
 
-    <div id="habitList" class="habit-list">
+    <section class="habit-form-container">
+      <h2>Empieza tu viaje</h2>
+      <p>Si necesitas inspiración, aquí tienes algunas ideas de hábitos que podrías comenzar a rastrear:</p>
+      <ul class="habit-ideas">
+        <li>Leer 20 páginas de un libro al día</li>
+        <li>Hacer ejercicio durante 30 minutos</li>
+        <li>Beber 2 litros de agua</li>
+        <li>Meditar 10 minutos al día</li>
+        <li>Escribir tus pensamientos o sentimientos en un diario</li>
+        <li>Practicar un nuevo idioma</li>
+      </ul>
+
+      <!-- Formulario para agregar un nuevo hábito -->
+      <div class="habit-form">
+        <input type="text" id="habitInput" placeholder="Nuevo hábito" />
+        <button id="addHabitButton">Añadir hábito</button>
+      </div>
+    </section>
+
+    <section id="habitList" class="habit-list">
       <!-- Aquí se agregarán los hábitos con su propio calendario -->
-    </div>
+    </section>
   </div>
 
   <script src="script.js"></script>

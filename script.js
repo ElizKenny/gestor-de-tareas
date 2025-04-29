@@ -62,8 +62,19 @@ function addHabit() {
     // Crear el calendario para el hábito
     const calendar = createCalendar(habitName);
     habitDiv.appendChild(calendar);
-    habitList.appendChild(habitDiv);
 
+    // Botón para eliminar el hábito
+    const deleteButton = document.createElement('button');
+    deleteButton.classList.add('delete-btn');
+    deleteButton.textContent = 'Eliminar';
+    deleteButton.addEventListener('click', () => {
+      habitDiv.remove();
+      saveHabits();  // Guardar después de eliminar un hábito
+    });
+    habitDiv.appendChild(deleteButton);
+
+    habitList.appendChild(habitDiv);
+    
     // Limpiar el campo de entrada
     habitInput.value = '';
     saveHabits();  // Guardar los hábitos después de agregar uno nuevo
@@ -77,33 +88,3 @@ addHabitButton.addEventListener('click', addHabit);
 
 // Cargar los hábitos cuando se carga la página
 window.onload = loadHabits;
-
-// Pedir permiso para notificaciones
-if (Notification.permission !== 'granted') {
-  Notification.requestPermission();
-}
-
-// Función para enviar notificación
-function sendNotification(habitName) {
-  if (Notification.permission === 'granted') {
-    new Notification(`No olvides tu hábito: ${habitName}`);
-  }
-}
-
-// Revisar si algún hábito no se completó al final del día (esto puede ser al final de la jornada)
-function checkForIncompleteHabits() {
-  const habits = JSON.parse(localStorage.getItem('habits')) || [];
-  habits.forEach(habit => {
-    if (habit.days.length === 0) {
-      sendNotification(habit.name);  // Enviar notificación si el hábito no tiene días completados
-    }
-  });
-}
-
-// Ejecutar la comprobación de hábitos a las 10:00 PM (por ejemplo)
-setInterval(() => {
-  const currentTime = new Date();
-  if (currentTime.getHours() === 22 && currentTime.getMinutes() === 0) {
-    checkForIncompleteHabits();
-  }
-}, 60000);  // Comprobar cada minuto
