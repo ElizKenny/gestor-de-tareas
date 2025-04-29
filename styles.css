@@ -12,6 +12,7 @@ body {
   align-items: flex-start;
   height: 100vh;
   flex-direction: column;
+  padding: 20px;
 }
 
 .container {
@@ -20,7 +21,8 @@ body {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  width: 350px;
+  width: 100%;
+  max-width: 600px;
 }
 
 h1 {
@@ -33,7 +35,8 @@ h1 {
 
 input {
   padding: 10px;
-  width: 200px;
+  width: 100%;
+  max-width: 200px;
   margin-right: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -68,8 +71,9 @@ button:hover {
 
 .calendar {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);  /* 7 días de la semana */
+  grid-template-columns: repeat(7, 1fr);
   gap: 5px;
+  margin-top: 10px;
 }
 
 .day {
@@ -87,4 +91,23 @@ button:hover {
 
 .day:hover {
   background-color: #ddd;
+
+/* Responsive: Estilos para pantallas pequeñas */
+@media (max-width: 600px) {
+  input {
+    width: 80%;
+  }
+
+  button {
+    width: 80%;
+    margin-top: 10px;
+  }
+
+  .habit-list {
+    width: 100%;
+  }
+
+  .habit {
+    padding: 15px;
+  }
 }
