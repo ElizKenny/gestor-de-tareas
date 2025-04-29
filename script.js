@@ -27,7 +27,7 @@ function createCalendar(habitName, completedDays = []) {
   calendarDiv.classList.add('calendar');
   calendarDiv.setAttribute('id', `calendar-${habitName}`);
 
-  const totalDays = 30;  // Número de días (puedes cambiarlo)
+  const totalDays = 30;  // Número de días (puedes cambiarlo a más si lo deseas)
   
   for (let day = 1; day <= totalDays; day++) {
     const dayElement = document.createElement('div');
@@ -78,6 +78,12 @@ function addHabit() {
     // Limpiar el campo de entrada
     habitInput.value = '';
     saveHabits();  // Guardar los hábitos después de agregar uno nuevo
+
+    // Expandir la página para mostrar el nuevo hábito
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: 'smooth'
+    });
   } else {
     alert('Por favor ingresa un nombre para el hábito');
   }
@@ -97,3 +103,4 @@ accordion.forEach(button => {
     panel.style.display = panel.style.display === "block" ? "none" : "block";
   });
 });
+// Función para mostrar un mensaje de éxito al guardar  
