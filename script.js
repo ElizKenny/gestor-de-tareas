@@ -1,4 +1,4 @@
-/* ---- acordeones ---- */
+/* --- acordeones --- */
 document.querySelectorAll('.accordion').forEach(btn=>{
   btn.addEventListener('click',()=>{
     btn.classList.toggle('active');
@@ -7,22 +7,22 @@ document.querySelectorAll('.accordion').forEach(btn=>{
   });
 });
 
-/* ---- hoy ---- */
+/* --- mostrar fecha de hoy --- */
 fetch('https://worldtimeapi.org/api/ip')
- .then(r=>r.json()).then(d=>setToday(new Date(d.datetime)))
- .catch(()=>setToday(new Date()));
+  .then(r=>r.json()).then(d=>setToday(new Date(d.datetime)))
+  .catch(()=>setToday(new Date()));
 function setToday(d){
   document.getElementById('todayLabel').textContent=
     `Hoy es ${d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`;
 }
 
-/* ---- refs ---- */
+/* --- refs DOM --- */
 const habitInput=document.getElementById('habitInput');
-const descInput =document.getElementById('descInput');
+const descInput=document.getElementById('descInput');
 const addBtn    =document.getElementById('addHabitButton');
 const list      =document.getElementById('habitList');
 
-/* ---- añadir ---- */
+/* --- añadir hábito --- */
 addBtn.addEventListener('click',()=>{
   const name=habitInput.value.trim();
   if(!name){alert('Escribe un hábito');return;}
@@ -31,38 +31,30 @@ addBtn.addEventListener('click',()=>{
   save();
 });
 
-/* ---- crear tarjeta ---- */
+/* --- crear tarjeta --- */
 function createCard(name,desc,start,completed){
   const card=document.createElement('div');card.className='habit';
 
-  /* CABECERA */
-  const title=document.createElement('h3');
-  title.textContent=name;title.ondblclick=()=>editText(title,'Nuevo nombre');
-
-  const edit=document.createElement('button');
-  edit.className='edit-btn';edit.textContent='Editar';
-  edit.onclick=()=>{ editNameAndDesc(card) };
-
-  const del=document.createElement('button');
-  del.className='delete-btn';del.textContent='Eliminar';
+  /* cabecera */
+  const title=document.createElement('h3');title.textContent=name;
+  title.ondblclick=()=>editField(title,'Nuevo nombre');
+  const edit=document.createElement('button');edit.className='edit-btn';edit.textContent='Editar';
+  edit.onclick=()=>editNameDesc(card);
+  const del=document.createElement('button');del.className='delete-btn';del.textContent='Eliminar';
   del.onclick=()=>{card.remove();save();};
 
   const header=document.createElement('header');
-  header.append(title,edit,del);
-  card.appendChild(header);
+  header.append(title,edit,del);card.appendChild(header);
 
-  /* DESCRIPCIÓN */
+  /* descripción */
   if(desc){
-    const p=document.createElement('p');
-    p.className='desc';
-    p.textContent=desc;
-    p.ondblclick=()=>editText(p,'Editar descripción');
-    card.appendChild(p);
+    const p=document.createElement('p');p.className='desc';p.textContent=desc;
+    p.ondblclick=()=>editField(p,'Editar descripción');card.appendChild(p);
   }
 
-  /* GRID 60 */
+  /* cuadrícula 40 */
   const grid=document.createElement('div');grid.className='days';
-  for(let i=1;i<=60;i++){
+  for(let i=1;i<=40;i++){
     const d=document.createElement('span');
     d.className='day'+(i===21?' milestone':'');
     d.textContent=i;
@@ -72,7 +64,7 @@ function createCard(name,desc,start,completed){
   }
   card.appendChild(grid);
 
-  /* FECHA */
+  /* fecha inicio */
   const startP=document.createElement('p');
   startP.style.cssText='font-size:.75rem;color:#666;margin-top:8px';
   startP.textContent=`Comenzado el ${new Date(start).toLocaleDateString('es-ES')}`;
@@ -81,28 +73,27 @@ function createCard(name,desc,start,completed){
   list.prepend(card);
 }
 
-/* ---- editar helpers ---- */
-function editText(el,msg){
+/* --- edición --- */
+function editField(el,msg){
   const nuevo=prompt(msg,el.textContent);
   if(nuevo!==null&&nuevo.trim()){el.textContent=nuevo.trim();save();}
 }
-function editNameAndDesc(card){
-  const title=card.querySelector('h3');
-  editText(title,'Nuevo nombre');
+function editNameDesc(card){
+  editField(card.querySelector('h3'),'Nuevo nombre');
   const desc=card.querySelector('.desc');
-  if(desc){editText(desc,'Editar descripción');}
+  if(desc){editField(desc,'Editar descripción');}
   else{
     const nuevo=prompt('Añadir descripción (opcional):','');
     if(nuevo!==null&&nuevo.trim()){
-      const p=document.createElement('p');
-      p.className='desc';p.textContent=nuevo.trim();
-      p.ondblclick=()=>editText(p,'Editar descripción');
+      const p=document.createElement('p');p.className='desc';p.textContent=nuevo.trim();
+      p.ondblclick=()=>editField(p,'Editar descripción');
       card.insertBefore(p,card.querySelector('.days'));
+      save();
     }
   }
 }
 
-/* ---- guardar/cargar ---- */
+/* --- guardar/cargar --- */
 function save(){
   const data=[];
   list.querySelectorAll('.habit').forEach(card=>{
