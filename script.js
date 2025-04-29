@@ -27,7 +27,7 @@ function createCalendar(habitName, completedDays = []) {
   calendarDiv.classList.add('calendar');
   calendarDiv.setAttribute('id', `calendar-${habitName}`);
 
-  const totalDays = 30;  // Número de días (puedes cambiarlo)
+  const totalDays = 30;
   
   for (let day = 1; day <= totalDays; day++) {
     const dayElement = document.createElement('div');
@@ -88,3 +88,12 @@ addHabitButton.addEventListener('click', addHabit);
 
 // Cargar los hábitos cuando se carga la página
 window.onload = loadHabits;
+
+// Acordeón para mostrar/ocultar las ideas de hábitos
+const accordion = document.querySelector('.accordion');
+const panel = document.querySelector('.panel');
+
+accordion.addEventListener('click', () => {
+  panel.style.display = panel.style.display === "block" ? "none" : "block";
+});
+// Cerrar el acordeón al hacer clic fuera de él 
