@@ -20,7 +20,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  height: 100vh;
+  min-height: 100vh;
   flex-direction: column;
   padding: 20px;
 }
@@ -34,6 +34,7 @@ body {
   max-width: 700px;
   margin-top: 50px;
   position: relative;
+  z-index: 1;
 }
 
 /* Header */
@@ -171,12 +172,16 @@ button:hover {
 
 /* Footer */
 .footer {
-  margin-top: 50px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   text-align: center;
   font-size: 0.9rem;
-  color: white; /* Texto blanco */
+  color: white;
   padding: 20px;
-  background-color: #333435; /* Fondo gris más oscuro */
+  background-color: #2b2e31; /* Fondo gris más oscuro */
+  z-index: 10;
 }
 
 .footer a {
