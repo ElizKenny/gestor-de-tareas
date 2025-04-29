@@ -1,6 +1,6 @@
 /* Fuentes */
 body {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Work Sans', sans-serif;
 }
 
 h1 {
@@ -19,7 +19,7 @@ body {
   color: #333;
   display: flex;
   justify-content: center;
-  align-items: center; /* Centrado vertical */
+  align-items: flex-start;
   min-height: 100vh;
   flex-direction: column;
   padding: 20px;
@@ -68,8 +68,11 @@ p {
   margin-bottom: 20px;
 }
 
-.intro {
-  margin-bottom: 30px;
+.info {
+  font-size: 1.2rem;
+  margin-top: 20px;
+  color: #555;
+  font-weight: bold;
 }
 
 .habit-form-container {
@@ -148,15 +151,12 @@ button:hover {
 
 /* Footer */
 .footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
+  margin-top: 50px;
   text-align: center;
   font-size: 0.9rem;
   color: white;
   padding: 20px;
-  background-color: #2c3e50; /* Fondo gris más oscuro */
+  background-color: #757575; /* Fondo gris más oscuro */
   z-index: 10;
 }
 
