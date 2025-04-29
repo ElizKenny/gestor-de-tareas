@@ -127,4 +127,25 @@ button:hover {
   .habit {
     padding: 15px;
   }
+  /* Estilos generales y ya existentes... */
+
+/* Estilos para el pie de página */
+.footer {
+  margin-top: 50px;
+  text-align: center;
+  font-size: 1rem;
+  color: #555;
+  padding: 20px;
+}
+
+.footer a {
+  color: #5cb85c;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+  transition: background-color 0.3s;
+} 
 }
