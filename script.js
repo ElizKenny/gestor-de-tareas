@@ -13,21 +13,16 @@ function addHabit() {
     habitDiv.innerHTML = `
       <h3>${habitName}</h3>
       <div class="habit-dates">
-        <span class="date" data-habit="${habitName}">1</span>
-        <span class="date" data-habit="${habitName}">2</span>
-        <span class="date" data-habit="${habitName}">3</span>
-        <span class="date" data-habit="${habitName}">4</span>
-        <span class="date" data-habit="${habitName}">5</span>
-        <span class="date" data-habit="${habitName}">6</span>
-        <span class="date" data-habit="${habitName}">7</span>
-        <!-- Agregar más días según sea necesario -->
+        ${[...Array(7).keys()].map(i => {
+          return `<span class="date" data-habit="${habitName}">${i + 1}</span>`;
+        }).join('')}
       </div>
     `;
     habitList.appendChild(habitDiv);
 
     // Limpiar el campo de entrada
     habitInput.value = '';
-
+    
     // Guardar el hábito en la memoria
     saveHabits();
   } else {
@@ -87,3 +82,13 @@ habitDates.addEventListener('click', function(event) {
     saveHabits();
   }
 });
+// Función para eliminar un hábito
+function deleteHabit(habitName) {
+  const habitItems = document.querySelectorAll('.habit');
+  habitItems.forEach(habitItem => {
+    if (habitItem.querySelector('h3').textContent === habitName) {
+      habitItem.remove();
+    }
+  });
+  saveHabits();
+}
