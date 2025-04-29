@@ -1,10 +1,10 @@
 /* Fuentes */
 body {
-  font-family: 'Robot', sans-serif;
+  font-family: 'Roboto', sans-serif;
 }
 
 h1 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Roboto', sans-serif;
 }
 
 /* Estilos generales */
@@ -19,7 +19,7 @@ body {
   color: #333;
   display: flex;
   justify-content: center;
-  align-items: center; /* Centrado vertical */
+  align-items: center;
   min-height: 100vh;
   flex-direction: column;
   padding: 20px;
@@ -75,6 +75,7 @@ p {
   font-weight: bold;
 }
 
+/* Formulario */
 .habit-form-container {
   margin-top: 40px;
   margin-bottom: 40px;
@@ -182,7 +183,7 @@ button:hover {
   font-size: 0.9rem;
   color: white;
   padding: 20px;
-  background-color: #d0d1d2; /* Fondo gris más claro */
+  background-color: #d3d3d3; /* Fondo gris más oscuro */
   width: 100%;
   position: relative;
 }
@@ -196,40 +197,25 @@ button:hover {
   text-decoration: underline;
 }
 
-/* FullCalendar Container */
-#calendarContainer {
-  width: 100%;
-  margin-top: 20px;
+/* Habit Dates */
+.habit-dates {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin-top: 30px;
 }
 
-#calendar {
-  max-width: 900px;
-  margin: 0 auto;
-  background-color: #f0f0f0; /* Fondo claro para el calendario */
-}
-
-/* Modificación de eventos en el calendario */
-.fc-event {
-  font-size: 12px;
-  padding: 5px;
+.habit-dates .date {
+  padding: 10px;
+  background-color: #f0f0f0;
   border-radius: 4px;
-  color: #fff; /* Color blanco para el texto */
+  text-align: center;
+  cursor: pointer;
 }
 
-/* Fechas visibles y color de las fechas */
-.fc-day-number {
-  color: black; /* Cambiar color de las fechas a negro */
-}
-
-/* Estilo para los días completados */
-.fc-day.completed {
-  background-color: #2ecc71 !important; /* Verde para días completados */
-  color: white !important;
-}
-
-/* Ajustes para el calendario */
-.fc-daygrid-day-number {
-  font-size: 16px; /* Aseguramos que las fechas sean legibles */
+.habit-dates .completed {
+  background-color: #2ecc71; /* Verde para días completados */
+  color: white;
 }
 
 /* Responsive */

@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rastreo de Hábitos</title>
-  <!-- FullCalendar CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Work+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -39,16 +37,15 @@
       </div>
     </section>
 
-    <!-- Sección para mostrar el calendario -->
-    <section id="calendarContainer" class="calendar-container" style="display: none;">
-      <div id="calendar"></div>
+    <!-- Bloque de fechas y hábitos -->
+    <section id="habitTracker">
+      <div id="habitList" class="habit-list">
+        <!-- Lista de hábitos agregados -->
+      </div>
+      <div id="habitDates" class="habit-dates">
+        <!-- Bloque de fechas para marcar -->
+      </div>
     </section>
-
-    <!-- Sección para mostrar los hábitos añadidos -->
-    <section id="habitList" class="habit-list">
-      <!-- Aquí se agregarán los hábitos con su propio calendario -->
-    </section>
-
   </div>
 
   <footer class="footer">
@@ -57,8 +54,6 @@
     </p>
   </footer>
 
-  <!-- FullCalendar JS -->
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
