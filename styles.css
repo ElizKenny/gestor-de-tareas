@@ -1,145 +1,50 @@
-/* ---------- fuentes & base ---------- */
+/* -------- fuentes & colores -------- */
 :root{
-  --mustard:#f1c40f;
-  --mustard-dark:#e0a903;
-  --green:#2ecc71;
+  --mustard:#f1c40f; --mustard-dark:#dba707;
+  --green:#2ecc71;   --milestone:#9b59b6;
+  --blue:#87CEEB;    --blue-dark:#5eaed2;
   --panel:#f8f8f8;
 }
-body{
-  font-family:'Roboto',sans-serif;
-  background:#f4f4f4;
-  margin:0;
-}
-.container{
-  max-width:950px;
-  margin:40px auto;
-  background:#fff;
-  border-radius:10px;
-  padding:40px 32px 60px;
-  box-shadow:0 8px 30px rgba(0,0,0,.08);
-}
-h1{margin:0 0 24px;color:#24344d;font-size:2.6rem;text-align:center}
+body{font-family:Roboto, sans-serif; margin:0; background:#f4f4f4}
 
-/* ---------- acordeón ---------- */
-.accordion{
-  width:100%;
-  background:#87CEEB;
-  border:none;
-  outline:none;
-  padding:14px 18px;
-  border-radius:6px;
-  font-size:1rem;
-  text-align:left;
-  cursor:pointer;
-  margin-top:16px;
-  transition:.2s;
-}
-.accordion:hover{background:#7ac2e0}
-.accordion.active{background:#5eb2d2}
-.panel{
-  display:none;
-  background:var(--panel);
-  padding:16px;
-  border-radius:6px;
-  margin-top:10px;
-}
+/* -------- contenedor -------- */
+.container{max-width:960px;margin:40px auto;background:#fff;border-radius:10px;padding:40px 32px 60px;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+h1{font-family:"Bebas Neue",cursive;font-size:3.4rem;letter-spacing:.5px;text-align:center;color:#24344d;margin:0 0 24px}
+.intro-text{text-align:center;margin:6px 0 0}
+.today-label{text-align:center;font-size:.9rem;margin-top:30px;color:#666}
 
-/* ---------- formulario ---------- */
-.habit-form{
-  display:flex;
-  gap:14px;
-  margin:32px 0;
-  justify-content:center;
-}
-.habit-form input{
-  padding:10px 14px;
-  width:260px;
-  border:1px solid #d0d0d0;
-  border-radius:6px;
-  font-size:1rem;
-}
-.add-habit-btn{
-  background:var(--mustard);
-  color:#fff;
-  border:none;
-  border-radius:6px;
-  padding:10px 24px;
-  font-weight:700;
-  cursor:pointer;
-}
+/* -------- acordeón -------- */
+.accordion{width:100%;background:var(--blue);color:#000;padding:14px 18px;border:none;border-radius:6px;cursor:pointer;font-size:1rem;text-align:left;margin-top:16px;transition:.2s}
+.accordion:hover{background:var(--blue-dark)}
+.accordion.active{background:var(--blue-dark)}
+.panel{display:none;background:var(--panel);padding:16px;border-radius:6px;margin-top:10px}
+
+/* -------- formulario -------- */
+.habit-form{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:32px 0}
+.habit-form input{padding:10px 14px;border:1px solid #d0d0d0;border-radius:6px;font-size:1rem;flex:1 1 240px}
+.add-habit-btn{background:var(--mustard);color:#fff;border:none;border-radius:6px;padding:10px 24px;font-weight:700;cursor:pointer}
 .add-habit-btn:hover{background:var(--mustard-dark)}
 
-/* ---------- tarjeta hábito ---------- */
-.habit{
-  background:#e9ecef;
-  border-radius:8px;
-  padding:18px 20px;
-  margin-bottom:20px;
-}
-.habit header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:12px;
-}
-.habit h3{margin:0;font-weight:700;font-size:1.05rem}
-.delete-btn{
-  background:#e74c3c;
-  border:none;
-  color:#fff;
-  padding:4px 10px;
-  border-radius:4px;
-  font-size:.85rem;
-  cursor:pointer;
-}
+/* -------- tarjeta hábito -------- */
+.habit{background:#e9ecef;border-radius:8px;padding:18px 20px;margin-bottom:24px}
+.habit header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.habit h3{margin:0;font-weight:700;font-size:1.05rem;cursor:pointer}
+.habit p.desc{margin:0 0 10px 0;font-size:.85rem;color:#555}
+.delete-btn{background:#e74c3c;border:none;color:#fff;padding:4px 10px;border-radius:4px;font-size:.8rem;cursor:pointer}
 .delete-btn:hover{background:#c0392b}
+.edit-icon{cursor:pointer;font-size:1rem;margin-left:4px}
 
-/* ---------- cuadrícula 21 días ---------- */
-.days{
-  display:grid;
-  grid-template-columns:repeat(7,1fr);
-  gap:8px;
-}
-.day{
-  background:#f0f0f0;
-  padding:8px 0;
-  text-align:center;
-  border-radius:4px;
-  cursor:pointer;
-  user-select:none;
-  font-size:.9rem;
-}
+/* -------- cuadrícula 60 días -------- */
+.days{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
+.day{background:#f0f0f0;padding:7px 0;text-align:center;border-radius:4px;cursor:pointer;font-size:.82rem;user-select:none}
 .day.completed{background:var(--green);color:#fff}
+.day.milestone{background:var(--milestone);color:#fff}
+.day.milestone.completed{background:#7c4792}
 
-/* ---------- hoy ---------- */
-.today-label{
-  text-align:center;
-  font-size:.9rem;
-  margin-top:30px;
-  color:#666;
-}
+/* -------- lista -------- */
+.habit-list{display:flex;flex-direction:column}
 
-/* ---------- footer ---------- */
-.footer{
-  background:#2c3e50;
-  color:#fff;
-  padding:18px 0;
-  text-align:center;
-  margin-top:60px;
-}
+/* -------- footer -------- */
+.footer{background:#2c3e50;color:#fff;padding:18px 0;text-align:center;margin-top:60px}
 .footer a{color:var(--mustard);text-decoration:none}
 .footer a:hover{text-decoration:underline}
-.footer p{
-  margin:0;
-  font-size:.9rem;
-  font-weight:400;
-}
-.footer p span{
-  font-weight:700;
-  color:var(--mustard);
-}
-.footer p span:hover{
-  text-decoration:underline;
-  cursor:pointer;
-} 
-
