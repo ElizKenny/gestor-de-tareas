@@ -1,4 +1,4 @@
-/* --- acordeones --- */
+/* ---------- acordeones ---------- */
 document.querySelectorAll('.accordion').forEach(btn=>{
   btn.addEventListener('click',()=>{
     btn.classList.toggle('active');
@@ -7,32 +7,34 @@ document.querySelectorAll('.accordion').forEach(btn=>{
   });
 });
 
-/* --- mostrar fecha de hoy --- */
+/* ---------- fecha de hoy ---------- */
+let today = new Date();                        // se usa luego para cálculos
 fetch('https://worldtimeapi.org/api/ip')
-  .then(r=>r.json()).then(d=>setToday(new Date(d.datetime)))
-  .catch(()=>setToday(new Date()));
+  .then(r=>r.json()).then(d=>{today=new Date(d.datetime);setToday(today);checkMissedDays();})
+  .catch(()=>{setToday(today);checkMissedDays();});
+
 function setToday(d){
   document.getElementById('todayLabel').textContent=
     `Hoy es ${d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`;
 }
 
-/* --- refs DOM --- */
+/* ---------- refs ---------- */
 const habitInput=document.getElementById('habitInput');
 const descInput=document.getElementById('descInput');
 const addBtn    =document.getElementById('addHabitButton');
 const list      =document.getElementById('habitList');
 
-/* --- añadir hábito --- */
+/* ---------- añadir hábito ---------- */
 addBtn.addEventListener('click',()=>{
   const name=habitInput.value.trim();
   if(!name){alert('Escribe un hábito');return;}
-  createCard(name,descInput.value.trim(),new Date(),[]);
+  createCard(name,descInput.value.trim(),today,[]);
   habitInput.value='';descInput.value='';
   save();
 });
 
-/* --- crear tarjeta --- */
-function createCard(name,desc,start,completed){
+/* ---------- crear tarjeta ---------- */
+function createCard(name,desc,start,completed,missed=[]){
   const card=document.createElement('div');card.className='habit';
 
   /* cabecera */
@@ -58,8 +60,13 @@ function createCard(name,desc,start,completed){
     const d=document.createElement('span');
     d.className='day'+(i===21?' milestone':'');
     d.textContent=i;
-    if(completed.includes(i))d.classList.add('completed');
-    d.onclick=()=>{d.classList.toggle('completed');save();};
+    if(completed.includes(i)) d.classList.add('completed');
+    if(missed.includes(i))   d.classList.add('missed');
+    d.onclick=()=>{
+      if(d.classList.contains('missed')) d.classList.remove('missed');
+      d.classList.toggle('completed');
+      save();
+    };
     grid.appendChild(d);
   }
   card.appendChild(grid);
@@ -73,7 +80,7 @@ function createCard(name,desc,start,completed){
   list.prepend(card);
 }
 
-/* --- edición --- */
+/* ---------- editar campos ---------- */
 function editField(el,msg){
   const nuevo=prompt(msg,el.textContent);
   if(nuevo!==null&&nuevo.trim()){el.textContent=nuevo.trim();save();}
@@ -93,19 +100,57 @@ function editNameDesc(card){
   }
 }
 
-/* --- guardar/cargar --- */
+/* ---------- guardar / cargar ---------- */
 function save(){
   const data=[];
   list.querySelectorAll('.habit').forEach(card=>{
     const name=card.querySelector('h3').textContent;
     const descEl=card.querySelector('.desc');const desc=descEl?descEl.textContent:'';
     const start=card.querySelector('p').textContent.split(' el ')[1];
-    const completed=[];card.querySelectorAll('.day.completed').forEach(d=>completed.push(+d.textContent));
-    data.push({name,desc,start,completed});
+    const completed=[], missed=[];
+    card.querySelectorAll('.day').forEach(d=>{
+      if(d.classList.contains('completed')) completed.push(+d.textContent);
+      else if(d.classList.contains('missed')) missed.push(+d.textContent);
+    });
+    data.push({name,desc,start,completed,missed});
   });
   localStorage.setItem('habits',JSON.stringify(data));
+  localStorage.setItem('lastOpenDate',today.toISOString().split('T')[0]);
 }
-(function load(){
+
+function load(){
   JSON.parse(localStorage.getItem('habits')||'[]')
-    .forEach(h=>createCard(h.name,h.desc,new Date(h.start),h.completed));
-})();
+    .forEach(h=>createCard(h.name,h.desc,new Date(h.start),h.completed,h.missed||[]));
+}
+load();
+
+/* ---------- detectar días olvidados ---------- */
+function checkMissedDays(){
+  const lastOpen=localStorage.getItem('lastOpenDate');
+  const lastDate= lastOpen ? new Date(lastOpen+"T00:00") : today;
+  const diffDays=Math.floor((dateOnly(today)-dateOnly(lastDate))/(1000*60*60*24));
+  if(diffDays<=0){save();return;}
+
+  let totalMissed=0;
+
+  list.querySelectorAll('.habit').forEach(card=>{
+    const startDateText=card.querySelector('p').textContent.split(' el ')[1];
+    const startDate=new Date(startDateText+"T00:00");
+    const daysPassed=Math.floor((dateOnly(today)-dateOnly(startDate))/(1000*60*60*24))+1;
+    const grid=card.querySelectorAll('.day');
+
+    for(let i=1;i<=Math.min(daysPassed-1,40);i++){          // hasta ayer, no incluye hoy
+      const cell=grid[i-1];
+      if(!cell.classList.contains('completed') && !cell.classList.contains('missed')){
+        cell.classList.add('missed');
+        totalMissed++;
+      }
+    }
+  });
+
+  if(totalMissed){
+    alert(`¡Atención! Tienes ${totalMissed} día(s) sin marcar desde tu última visita.`);
+  }
+  save();
+}
+function dateOnly(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate());}
