@@ -182,7 +182,7 @@ button:hover {
   font-size: 0.9rem;
   color: white;
   padding: 20px;
-  background-color: #e5e5e5; /* Fondo gris más oscuro */
+  background-color: #2c3e50; /* Fondo gris más oscuro */
   width: 100%;
   position: relative;
 }
@@ -208,8 +208,22 @@ button:hover {
   background-color: #f0f0f0; /* Fondo claro para el calendario */
 }
 
+/* Modificación de eventos en el calendario */
+.fc-event {
+  font-size: 12px;
+  padding: 5px;
+  border-radius: 4px;
+  color: #fff; /* Color blanco para el texto */
+}
+
+/* Fechas visibles y color de las fechas */
 .fc-day-number {
   color: black; /* Cambiar color de las fechas a negro */
+}
+
+/* Ajustes para el calendario */
+.fc-daygrid-day-number {
+  font-size: 16px; /* Aseguramos que las fechas sean legibles */
 }
 
 /* Responsive */
@@ -247,28 +261,4 @@ button:hover {
   .intro-text {
     font-size: 1rem;
   }
-}
-
-/* FullCalendar Container */
-#calendarContainer {
-  width: 100%;
-  margin-top: 20px;
-}
-
-#calendar {
-  max-width: 900px;
-  margin: 0 auto;
-  background-color: #f0f0f0; /* Fondo claro para el calendario */
-}
-
-.fc-day-number {
-  color: black; /* Cambiar color de las fechas a negro */
-}
-
-/* Modificación de eventos en el calendario */
-.fc-event {
-  font-size: 12px;
-  padding: 5px;
-  border-radius: 4px;
-  color: #fff; /* Color blanco para el texto */
 }

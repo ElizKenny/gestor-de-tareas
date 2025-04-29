@@ -14,13 +14,15 @@ const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), 
   editable: true, // Permitir mover y cambiar eventos
   droppable: true, // Permitir arrastrar eventos
   dateClick: function(info) {
-    // Marcar el día como completado o tachado
+    // Marcar el día como completado o tachado (con un color de fondo)
     const clickedDate = info.dateStr;
     let dayEvent = calendar.getEventById(clickedDate);
     
     if (dayEvent) {
-      dayEvent.remove();  // Si ya está marcado, eliminarlo
+      // Si ya está marcado, eliminarlo
+      dayEvent.remove();  
     } else {
+      // Crear un evento (marca el día como "completado")
       calendar.addEvent({
         id: clickedDate, // Usamos la fecha como ID único
         title: 'Hábito Completado',
@@ -97,11 +99,17 @@ function loadHabits() {
 
 // Cargar los hábitos al cargar la página
 document.addEventListener('DOMContentLoaded', loadHabits);
-// Función para eliminar un hábito
-function deleteHabit(habitId) {
-  const habitToDelete = calendar.getEventById(habitId);
-  if (habitToDelete) {
-    habitToDelete.remove();
-    saveHabits(); // Guardar cambios después de eliminar
-  }
-}
+
+// Desplegables para "¿Qué es el rastreo de hábitos?" y "Empieza tu viaje"
+const accordions = document.querySelectorAll('.accordion');
+accordions.forEach((accordion) => {
+  accordion.addEventListener('click', function() {
+    this.classList.toggle('active');
+    const panel = this.nextElementSibling;
+    if (panel.style.display === "block") {
+      panel.style.display = "none";
+    } else {
+      panel.style.display = "block";
+    }
+  });
+});
