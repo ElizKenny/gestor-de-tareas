@@ -1,22 +1,33 @@
-/* ---------- utilidades ---------- */
-function dateOnly(d){ return new Date(d.getFullYear(),d.getMonth(),d.getDate()); }
+/* ---------- utilidades de fecha ---------- */
+function dateOnly(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
 function pad(n){ return n<10 ? '0'+n : ''+n; }
 function toISO(d){
-  d=dateOnly(d);
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; // YYYY-MM-DD
+  d = dateOnly(d);
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 }
 function fromISO(iso){
-  const [y,m,day]=iso.split('-').map(Number);
+  const [y,m,day] = iso.split('-').map(Number);
   return new Date(y, m-1, day);
 }
 function todayISO(){ return toISO(new Date()); }
 
+/* ---------- referencias (se rellenan al cargar) ---------- */
+let habitInput, descInput, list;
+
 /* ---------- arranque ---------- */
 document.addEventListener('DOMContentLoaded',()=>{
+
+  /* refs DOM YA existen */
+  habitInput = document.getElementById('habitInput');
+  descInput  = document.getElementById('descInput');
+  list       = document.getElementById('habitList');
+  const addBtn = document.getElementById('addHabitButton');
+
   initAccordions();
   renderToday();
   loadHabits();
-  document.getElementById('addHabitButton').addEventListener('click',addHabit);
+
+  addBtn.addEventListener('click', addHabit);    // ahora sí existe el botón
 });
 
 /* ---------- acordeones ---------- */
@@ -24,35 +35,32 @@ function initAccordions(){
   document.querySelectorAll('.accordion').forEach(btn=>{
     btn.addEventListener('click',()=>{
       btn.classList.toggle('active');
-      const p=btn.nextElementSibling;
-      p.style.display=p.style.display==='block'?'none':'block';
+      const panel = btn.nextElementSibling;
+      panel.style.display = panel.style.display==='block' ? 'none' : 'block';
     });
   });
 }
 
 /* ---------- hoy ---------- */
 function renderToday(){
-  const d=dateOnly(new Date());
+  const d = dateOnly(new Date());
   document.getElementById('todayLabel').textContent =
-    `Hoy es ${d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`;
+    `Hoy es ${d.toLocaleDateString('es-ES',{
+      weekday:'long', day:'numeric', month:'long', year:'numeric'
+    })}`;
 }
-
-/* ---------- refs ---------- */
-const habitInput=document.getElementById('habitInput');
-const descInput =document.getElementById('descInput');
-const list      =document.getElementById('habitList');
 
 /* ---------- añadir hábito ---------- */
 function addHabit(){
-  const name=habitInput.value.trim();
+  const name = habitInput.value.trim();
   if(!name){ alert('Escribe un hábito'); return; }
-  createCard(name,descInput.value.trim(),todayISO(),[]);
+  createCard(name, descInput.value.trim(), todayISO(), []);
   habitInput.value=''; descInput.value='';
   saveHabits();
 }
 
 /* ---------- crear tarjeta ---------- */
-function createCard(name,desc,startISO,completed=[]){
+function createCard(name, desc, startISO, completed=[]){
   const card=document.createElement('div'); card.className='habit';
 
   /* cabecera */
@@ -82,7 +90,7 @@ function createCard(name,desc,startISO,completed=[]){
   const grid=document.createElement('div'); grid.className='days';
   const startDate=fromISO(startISO);
   const today=dateOnly(new Date());
-  const daysPassed=Math.floor((today-startDate)/86400000); // 0-based
+  const daysPassed=Math.floor((today-startDate)/86400000);
 
   for(let i=1;i<=40;i++){
     const cell=document.createElement('span');
@@ -101,10 +109,10 @@ function createCard(name,desc,startISO,completed=[]){
   }
   card.appendChild(grid);
 
-  /* fecha inicio visible + ISO */
+  /* fecha inicio */
+  const [y,m,d] = startISO.split('-');
   const startP=document.createElement('p');
   startP.dataset.startIso=startISO;
-  const [y,m,d]=startISO.split('-');
   startP.textContent=`Comenzado el ${d}/${m}/${y}`;
   startP.style.cssText='font-size:.75rem;color:#666;margin-top:8px';
   card.appendChild(startP);
@@ -127,7 +135,7 @@ function editNameDesc(card){
       const p=document.createElement('p');
       p.className='desc'; p.textContent=t.trim();
       p.ondblclick=()=>editField(p,'Editar descripción');
-      card.insertBefore(p,card.querySelector('.days'));
+      card.insertBefore(p, card.querySelector('.days'));
       saveHabits();
     }
   }
