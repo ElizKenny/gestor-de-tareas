@@ -1,34 +1,28 @@
-/* ---------- Utilidades de fecha ---------- */
+/* ========== UTILIDADES DE FECHA ========== */
 function dateOnly(d) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
-function isoString(d) {
-  return d.toISOString().split('T')[0]; // "YYYY-MM-DD"
+function getToday() {
+  return dateOnly(new Date());
 }
-function isoToLocalDate(iso) {
+function toISO(d) {
+  return d.toISOString().split('T')[0];  // "YYYY-MM-DD"
+}
+function fromISO(iso) {
   const [y, m, day] = iso.split('-').map(Number);
   return new Date(y, m - 1, day);
 }
 
-/* ---------- Obtener hoy ---------- */
-function getToday() {
-  return dateOnly(new Date());
-}
-function getTodayISO() {
-  return isoString(getToday());
-}
-
-/* ---------- Inicialización ---------- */
+/* ========== ARRANQUE ========== */
 document.addEventListener('DOMContentLoaded', () => {
   initAccordions();
-  renderToday();
+  renderTodayLabel();
   loadHabits();
   checkMissedDays();
-  document.getElementById('addHabitButton')
-          .addEventListener('click', addHabit);
+  document.getElementById('addHabitButton').addEventListener('click', addHabit);
 });
 
-/* ---------- Acordeones ---------- */
+/* ========== ACORDEONES ========== */
 function initAccordions() {
   document.querySelectorAll('.accordion').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -39,38 +33,35 @@ function initAccordions() {
   });
 }
 
-/* ---------- Mostrar "Hoy es ..." ---------- */
-function renderToday() {
+/* ========== HOY ========== */
+function renderTodayLabel() {
   const today = getToday();
   document.getElementById('todayLabel').textContent =
     `Hoy es ${today.toLocaleDateString('es-ES', {
-      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+       weekday:'long', day:'numeric', month:'long', year:'numeric'
     })}`;
 }
 
-/* ---------- Agregar nuevo hábito ---------- */
+/* ========== AÑADIR HÁBITO ========== */
 function addHabit() {
-  const habitInput = document.getElementById('habitInput');
-  const descInput  = document.getElementById('descInput');
-  const name = habitInput.value.trim();
-  if (!name) {
-    alert('Escribe un hábito');
-    return;
-  }
-  // Fecha de inicio ISO, proveniente del sistema
-  const startISO = getTodayISO();
-  createCard(name, descInput.value.trim(), startISO, [], []);
-  habitInput.value = '';
-  descInput.value  = '';
+  const name = document.getElementById('habitInput').value.trim();
+  if (!name) return alert('Escribe un hábito');
+
+  const desc     = document.getElementById('descInput').value.trim();
+  const startISO = toISO(getToday());
+
+  createCard(name, desc, startISO, [], []);
+  document.getElementById('habitInput').value = '';
+  document.getElementById('descInput').value  = '';
   saveHabits();
 }
 
-/* ---------- Crear tarjeta de hábito ---------- */
+/* ========== CREAR TARJETA ========== */
 function createCard(name, desc, startISO, completed = [], missed = []) {
   const list = document.getElementById('habitList');
   const card = document.createElement('div'); card.className = 'habit';
 
-  // Cabecera: título + editar + eliminar
+  // Cabecera
   const title = document.createElement('h3');
   title.textContent = name;
   title.ondblclick = () => editField(title, 'Nuevo nombre');
@@ -89,7 +80,7 @@ function createCard(name, desc, startISO, completed = [], missed = []) {
   header.append(title, editBtn, delBtn);
   card.appendChild(header);
 
-  // Descripción (opcional)
+  // Descripción
   if (desc) {
     const p = document.createElement('p');
     p.className = 'desc';
@@ -98,10 +89,9 @@ function createCard(name, desc, startISO, completed = [], missed = []) {
     card.appendChild(p);
   }
 
-  // Cuadrícula de 40 días
-  const grid       = document.createElement('div');
-  grid.className   = 'days';
-  const startDate  = isoToLocalDate(startISO);
+  // Cuadrícula 40 días
+  const grid       = document.createElement('div'); grid.className = 'days';
+  const startDate  = fromISO(startISO);
   const today      = getToday();
   const daysPassed = Math.floor((today - startDate) / 86400000); // 0-based
 
@@ -110,9 +100,9 @@ function createCard(name, desc, startISO, completed = [], missed = []) {
     cell.className = 'day' + (i === 21 ? ' milestone' : '');
     cell.textContent = i;
 
-    // Futuro → deshabilitado
+    // futuro
     if (i - 1 > daysPassed) cell.classList.add('disabled');
-    // Pasado completado / omitido
+    // completados / omitidos
     if (completed.includes(i)) cell.classList.add('completed');
     if (missed.includes(i))    cell.classList.add('missed');
 
@@ -126,46 +116,45 @@ function createCard(name, desc, startISO, completed = [], missed = []) {
   }
   card.appendChild(grid);
 
-  // Fecha de inicio (visible en DD/MM/YYYY) y oculto en data-attribute
+  // Fecha inicio visible + ISO en data-attr
   const startP = document.createElement('p');
   startP.dataset.startIso = startISO;
-  const [year, month, day] = startISO.split('-');
-  startP.textContent = `Comenzado el ${day}/${month}/${year}`;
+  const [y, m, d] = startISO.split('-');
+  startP.textContent = `Comenzado el ${d}/${m}/${y}`;
   startP.style.cssText = 'font-size:.75rem;color:#666;margin-top:8px';
   card.appendChild(startP);
 
   list.prepend(card);
 }
 
-/* ---------- Edición inline ---------- */
+/* ========== EDICIÓN INLINE ========== */
 function editField(el, msg) {
-  const nuevo = prompt(msg, el.textContent);
-  if (nuevo !== null && nuevo.trim()) {
-    el.textContent = nuevo.trim();
+  const val = prompt(msg, el.textContent);
+  if (val && val.trim()) {
+    el.textContent = val.trim();
     saveHabits();
   }
 }
 function editNameDesc(card) {
   editField(card.querySelector('h3'), 'Nuevo nombre');
-  const d = card.querySelector('.desc');
-  if (d) {
-    editField(d, 'Editar descripción');
-  } else {
-    const text = prompt('Añadir descripción (opcional):', '');
-    if (text !== null && text.trim()) {
+  const desc = card.querySelector('.desc');
+  if (desc) editField(desc, 'Editar descripción');
+  else {
+    const text = prompt('Añadir descripción (opcional):','');
+    if (text && text.trim()) {
       const p = document.createElement('p');
       p.className = 'desc';
       p.textContent = text.trim();
-      p.ondblclick = () => editField(p, 'Editar descripción');
+      p.ondblclick = () => editField(p,'Editar descripción');
       card.insertBefore(p, card.querySelector('.days'));
       saveHabits();
     }
   }
 }
 
-/* ---------- Guardar en localStorage ---------- */
+/* ========== GUARDAR/CARGAR ========== */
 function saveHabits() {
-  const data = [];
+  const arr = [];
   document.querySelectorAll('.habit').forEach(card => {
     const name     = card.querySelector('h3').textContent;
     const descEl   = card.querySelector('.desc');
@@ -177,49 +166,40 @@ function saveHabits() {
       if (c.classList.contains('completed')) completed.push(idx);
       else if (c.classList.contains('missed')) missed.push(idx);
     });
-    data.push({ name, desc, startISO, completed, missed });
+    arr.push({ name, desc, startISO, completed, missed });
   });
-  localStorage.setItem('habits', JSON.stringify(data));
+  localStorage.setItem('habits', JSON.stringify(arr));
   localStorage.setItem('lastOpenDate', getTodayISO());
 }
 
-/* ---------- Cargar desde localStorage ---------- */
 function loadHabits() {
-  JSON.parse(localStorage.getItem('habits') || '[]')
+  JSON.parse(localStorage.getItem('habits')||'[]')
     .forEach(h => createCard(h.name, h.desc, h.startISO, h.completed, h.missed));
 }
 
-/* ---------- Marcar días omitidos al volver ---------- */
+/* ========== DÍAS OMITIDOS ========== */
 function checkMissedDays() {
   const lastISO = localStorage.getItem('lastOpenDate');
-  const last    = lastISO ? isoToLocalDate(lastISO) : getToday();
+  const last    = lastISO ? fromISO(lastISO) : getToday();
   const diff    = Math.floor((getToday() - last) / 86400000);
-  if (diff <= 0) {
-    saveHabits();
-    return;
-  }
+  if (diff <= 0) { saveHabits(); return; }
 
-  let missedCount = 0;
+  let misses = 0;
   document.querySelectorAll('.habit').forEach(card => {
     const startISO = card.querySelector('p').dataset.startIso;
-    const start    = isoToLocalDate(startISO);
-    const daysSince = Math.floor((getToday() - start) / 86400000) + 1;
+    const start    = fromISO(startISO);
+    const daysSince= Math.floor((getToday() - start) / 86400000) + 1;
 
     card.querySelectorAll('.day').forEach(c => {
       const idx = +c.textContent;
-      if (
-        idx <= Math.min(daysSince - 1, 40) &&
-        !c.classList.contains('completed') &&
-        !c.classList.contains('missed')
-      ) {
-        c.classList.add('missed');
-        missedCount++;
+      if (idx <= Math.min(daysSince - 1, 40) &&
+          !c.classList.contains('completed') &&
+          !c.classList.contains('missed')) {
+        c.classList.add('missed'); misses++;
       }
     });
   });
 
-  if (missedCount) {
-    alert(`Tienes ${missedCount} día(s) sin marcar desde tu última visita.`);
-  }
+  if (misses) alert(`Tienes ${misses} día(s) sin marcar desde tu última visita.`);
   saveHabits();
 }
