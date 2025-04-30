@@ -3,9 +3,9 @@
   --mustard-dark: #dba707;
   --green: #2ecc71;
   --milestone: #9b59b6;
-  --panel: #f8f8f8;
   --pastel: #cfe7ff;
   --pastel-dark: #aed3ff;
+  --panel: #f8f8f8;
 }
 
 /* ---- Base ---- */
@@ -143,10 +143,10 @@ h1 {
   color: #555;
 }
 
-/* ---- Grid 60 días ---- */
+/* ---- Grid 40 días ---- */
 .days {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   gap: 6px;
 }
 .day {
@@ -166,8 +166,11 @@ h1 {
   background: var(--milestone);
   color: #fff;
 }
-.day.milestone.completed {
-  background: #7c4792;
+/* ---- Casillas futuras bloqueadas ---- */
+.day.disabled {
+  background: #eeeeee;
+  color: #bbb;
+  cursor: default;
 }
 
 /* ---- Footer ---- */
