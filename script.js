@@ -94,9 +94,9 @@ function createCard(name,desc,start,completed,missed=[]){
   /* FECHA INICIO */
   const startP=document.createElement('p');
   startP.style.cssText='font-size:.75rem;color:#666;margin-top:8px';
-  startP.textContent=`Comenzado el ${startDateOnly.toLocaleDateString('es-ES')}`;
+  startP.dataset.startIso = startDateOnly.toISOString().split('T')[0];   // ↓ para el script  
+  startP.textContent      = `Comenzado el ${startDateOnly.toLocaleDateString('es-ES')}`;
   card.appendChild(startP);
-
   list.prepend(card);
 }
 
@@ -127,7 +127,7 @@ function save(){
   list.querySelectorAll('.habit').forEach(card=>{
     const name=card.querySelector('h3').textContent;
     const descEl=card.querySelector('.desc');const desc=descEl?descEl.textContent:'';
-    const start=card.querySelector('p').textContent.split(' el ')[1];
+    const start = card.querySelector('p').dataset.startIso;
     const completed=[], missed=[];
     card.querySelectorAll('.day').forEach(d=>{
       if(d.classList.contains('completed')) completed.push(+d.textContent);
@@ -153,8 +153,8 @@ function checkMissedDays(){
 
   let missedCount=0;
   list.querySelectorAll('.habit').forEach(card=>{
-    const startText=card.querySelector('p').textContent.split(' el ')[1];
-    const startDate=new Date(startText+"T00:00");
+    const startIso   = card.querySelector('p').dataset.startIso;
+    const startDate  = new Date(startIso+"T00:00");
     const daysSinceStart=Math.floor((dateOnly(today)-dateOnly(startDate))/(1000*60*60*24))+1;
     const cells=card.querySelectorAll('.day');
 
