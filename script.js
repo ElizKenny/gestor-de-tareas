@@ -2,80 +2,85 @@
 function dateOnly(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
 function iso(d){ return d.toISOString().split('T')[0]; }
 
-/* ---------- fecha de hoy (local) ---------- */
+/* ---------- variables ---------- */
 let today = dateOnly(new Date());
 let todayISO = iso(today);
 
-setTodayLabel();
-loadHabits();
-checkMissedDays();
+/* ---------- arranque seguro cuando el DOM cargue ---------- */
+document.addEventListener('DOMContentLoaded', () => {
+  setTodayLabel();
+  loadHabits();
+  checkMissedDays();
 
-/* ---------- etiqueta “Hoy es…” ---------- */
+  /* botón añadir */
+  document.getElementById('addHabitButton')
+    .addEventListener('click', addHabit);
+});
+
+/* ---------- etiqueta Hoy es… ---------- */
 function setTodayLabel(){
   document.getElementById('todayLabel').textContent =
     `Hoy es ${today.toLocaleDateString('es-ES',
-        {weekday:'long', day:'numeric', month:'long', year:'numeric'})}`;
+      {weekday:'long', day:'numeric', month:'long', year:'numeric'})}`;
 }
 
-/* ---------- refs ---------- */
-const habitInput = document.getElementById('habitInput');
-const descInput  = document.getElementById('descInput');
-const addBtn     = document.getElementById('addHabitButton');
-const list       = document.getElementById('habitList');
-
 /* ---------- añadir hábito ---------- */
-addBtn.addEventListener('click', ()=>{
+function addHabit(){
+  const habitInput = document.getElementById('habitInput');
+  const descInput  = document.getElementById('descInput');
   const name = habitInput.value.trim();
   if(!name){ alert('Escribe un hábito'); return; }
 
   createCard(name, descInput.value.trim(), todayISO, [], []);
   habitInput.value=''; descInput.value='';
   saveHabits();
-});
+}
 
 /* ---------- crear tarjeta ---------- */
 function createCard(name, desc, startISO, completed=[], missed=[]){
+  const list = document.getElementById('habitList');
   const card = document.createElement('div'); card.className='habit';
 
   /* cabecera */
-  const title=document.createElement('h3');
-  title.textContent=name;
-  title.ondblclick=()=>editField(title,'Nuevo nombre');
+  const title = document.createElement('h3');
+  title.textContent = name;
+  title.ondblclick = () => editField(title,'Nuevo nombre');
 
-  const edit=document.createElement('button');
+  const edit = document.createElement('button');
   edit.className='edit-btn'; edit.textContent='Editar';
-  edit.onclick=()=>editNameDesc(card);
+  edit.onclick = () => editNameDesc(card);
 
-  const del=document.createElement('button');
+  const del = document.createElement('button');
   del.className='delete-btn'; del.textContent='Eliminar';
-  del.onclick=()=>{ card.remove(); saveHabits(); };
+  del.onclick = () => { card.remove(); saveHabits(); };
 
-  const header=document.createElement('header');
-  header.append(title,edit,del); card.appendChild(header);
+  const header = document.createElement('header');
+  header.append(title, edit, del);
+  card.appendChild(header);
 
   /* descripción */
   if(desc){
-    const p=document.createElement('p');
+    const p = document.createElement('p');
     p.className='desc'; p.textContent=desc;
-    p.ondblclick=()=>editField(p,'Editar descripción');
+    p.ondblclick = () => editField(p,'Editar descripción');
     card.appendChild(p);
   }
 
   /* cuadrícula 40 */
-  const grid=document.createElement('div'); grid.className='days';
-  const startDate=dateOnly(new Date(startISO));
-  const daysPassed=Math.floor((today-startDate)/86400000);
+  const grid = document.createElement('div'); grid.className='days';
+  const startDate = dateOnly(new Date(startISO));
+  const daysPassed = Math.floor((today - startDate)/86400000);
 
   for(let i=1;i<=40;i++){
-    const cell=document.createElement('span');
-    cell.className='day'+(i===21?' milestone':'');
-    cell.textContent=i;
+    const cell = document.createElement('span');
+    cell.className = 'day' + (i===21 ? ' milestone' : '');
+    cell.textContent = i;
 
     if(i-1>daysPassed) cell.classList.add('disabled');
     if(completed.includes(i)) cell.classList.add('completed');
     if(missed.includes(i))    cell.classList.add('missed');
 
-    cell.onclick=()=>{
+    cell.onclick = ()=>{
       if(cell.classList.contains('disabled')) return;
       if(cell.classList.contains('missed')) cell.classList.remove('missed');
       cell.classList.toggle('completed');
@@ -85,11 +90,11 @@ function createCard(name, desc, startISO, completed=[], missed=[]){
   }
   card.appendChild(grid);
 
-  /* fecha inicio visible + ISO oculto */
-  const startP=document.createElement('p');
-  startP.dataset.startIso=startISO;
+  /* fecha inicio */
+  const startP = document.createElement('p');
+  startP.dataset.startIso = startISO;
   startP.style.cssText='font-size:.75rem;color:#666;margin-top:8px';
-  startP.textContent=`Comenzado el ${startDate.toLocaleDateString('es-ES')}`;
+  startP.textContent = `Comenzado el ${startDate.toLocaleDateString('es-ES')}`;
   card.appendChild(startP);
 
   list.prepend(card);
@@ -97,20 +102,23 @@ function createCard(name, desc, startISO, completed=[], missed=[]){
 
 /* ---------- edición ---------- */
 function editField(el,msg){
-  const nuevo=prompt(msg,el.textContent);
-  if(nuevo!==null && nuevo.trim()){ el.textContent=nuevo.trim(); saveHabits(); }
+  const nuevo = prompt(msg, el.textContent);
+  if(nuevo && nuevo.trim()){
+    el.textContent = nuevo.trim();
+    saveHabits();
+  }
 }
 function editNameDesc(card){
   editField(card.querySelector('h3'),'Nuevo nombre');
-  const d=card.querySelector('.desc');
+  const d = card.querySelector('.desc');
   if(d){ editField(d,'Editar descripción'); }
   else{
-    const nuevo=prompt('Añadir descripción (opcional):','');
-    if(nuevo!==null && nuevo.trim()){
+    const nuevo = prompt('Añadir descripción (opcional):','');
+    if(nuevo && nuevo.trim()){
       const p=document.createElement('p');
       p.className='desc'; p.textContent=nuevo.trim();
-      p.ondblclick=()=>editField(p,'Editar descripción');
-      card.insertBefore(p,card.querySelector('.days'));
+      p.ondblclick = ()=>editField(p,'Editar descripción');
+      card.insertBefore(p, card.querySelector('.days'));
       saveHabits();
     }
   }
@@ -119,9 +127,9 @@ function editNameDesc(card){
 /* ---------- guardar ---------- */
 function saveHabits(){
   const arr=[];
-  list.querySelectorAll('.habit').forEach(card=>{
-    const name = card.querySelector('h3').textContent;
-    const descEl = card.querySelector('.desc'); const desc=descEl?descEl.textContent:'';
+  document.querySelectorAll('.habit').forEach(card=>{
+    const name=card.querySelector('h3').textContent;
+    const descEl=card.querySelector('.desc'); const desc=descEl?descEl.textContent:'';
     const startISO=card.querySelector('p').dataset.startIso;
     const completed=[], missed=[];
     card.querySelectorAll('.day').forEach(c=>{
@@ -143,21 +151,20 @@ function loadHabits(){
 
 /* ---------- días olvidados ---------- */
 function checkMissedDays(){
-  const lastISO=localStorage.getItem('lastOpenDate');
-  const last=lastISO ? new Date(lastISO+'T00:00') : today;
-  const diff=Math.floor((today-last)/86400000);
+  const lastISO = localStorage.getItem('lastOpenDate');
+  const last = lastISO ? new Date(lastISO+'T00:00') : today;
+  const diff = Math.floor((today - last)/86400000);
   if(diff<=0){ saveHabits(); return; }
 
-  let missed=0;
-
-  list.querySelectorAll('.habit').forEach(card=>{
-    const startISO=card.querySelector('p').dataset.startIso;
-    const start=dateOnly(new Date(startISO));
-    const daysSince=Math.floor((today-start)/86400000)+1;
+  let missed = 0;
+  document.querySelectorAll('.habit').forEach(card=>{
+    const startISO = card.querySelector('p').dataset.startIso;
+    const start = dateOnly(new Date(startISO));
+    const daysSince = Math.floor((today - start)/86400000)+1;
 
     card.querySelectorAll('.day').forEach(c=>{
       const idx=+c.textContent;
-      if(idx<=Math.min(daysSince-1,40) &&
+      if(idx <= Math.min(daysSince-1,40) &&
          !c.classList.contains('completed') &&
          !c.classList.contains('missed')){
         c.classList.add('missed');
