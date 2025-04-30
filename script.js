@@ -1,4 +1,4 @@
-/* ---------- utilidades de fecha ---------- */
+/* ---------- utilidades ---------- */
 function dateOnly(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
 function pad(n){ return n<10 ? '0'+n : ''+n; }
 function toISO(d){
@@ -11,23 +11,21 @@ function fromISO(iso){
 }
 function todayISO(){ return toISO(new Date()); }
 
-/* ---------- referencias (se rellenan al cargar) ---------- */
+/* ---------- refs (se asignan tras DOMContentLoaded) ---------- */
 let habitInput, descInput, list;
 
-/* ---------- arranque ---------- */
-document.addEventListener('DOMContentLoaded',()=>{
+/* ---------- arranque seguro ---------- */
+document.addEventListener('DOMContentLoaded', () => {
 
-  /* refs DOM YA existen */
+  /* refs ya existen */
   habitInput = document.getElementById('habitInput');
   descInput  = document.getElementById('descInput');
   list       = document.getElementById('habitList');
-  const addBtn = document.getElementById('addHabitButton');
+  document.getElementById('addHabitButton').addEventListener('click', addHabit);
 
   initAccordions();
   renderToday();
-  loadHabits();
-
-  addBtn.addEventListener('click', addHabit);    // ahora sí existe el botón
+  loadHabits();      // ahora ignora registros antiguos incorrectos
 });
 
 /* ---------- acordeones ---------- */
@@ -35,15 +33,15 @@ function initAccordions(){
   document.querySelectorAll('.accordion').forEach(btn=>{
     btn.addEventListener('click',()=>{
       btn.classList.toggle('active');
-      const panel = btn.nextElementSibling;
-      panel.style.display = panel.style.display==='block' ? 'none' : 'block';
+      const p = btn.nextElementSibling;
+      p.style.display = p.style.display==='block' ? 'none' : 'block';
     });
   });
 }
 
 /* ---------- hoy ---------- */
 function renderToday(){
-  const d = dateOnly(new Date());
+  const d=dateOnly(new Date());
   document.getElementById('todayLabel').textContent =
     `Hoy es ${d.toLocaleDateString('es-ES',{
       weekday:'long', day:'numeric', month:'long', year:'numeric'
@@ -61,7 +59,12 @@ function addHabit(){
 
 /* ---------- crear tarjeta ---------- */
 function createCard(name, desc, startISO, completed=[]){
-  const card=document.createElement('div'); card.className='habit';
+  /* Si startISO es falsy o malformado, usa hoy */
+  if(!startISO || !/^\d{4}-\d{2}-\d{2}$/.test(startISO)){
+    startISO = todayISO();
+  }
+
+  const card = document.createElement('div'); card.className='habit';
 
   /* cabecera */
   const title=document.createElement('h3'); title.textContent=name;
@@ -109,8 +112,8 @@ function createCard(name, desc, startISO, completed=[]){
   }
   card.appendChild(grid);
 
-  /* fecha inicio */
-  const [y,m,d] = startISO.split('-');
+  /* fecha inicio visible */
+  const [y,m,d]=startISO.split('-');
   const startP=document.createElement('p');
   startP.dataset.startIso=startISO;
   startP.textContent=`Comenzado el ${d}/${m}/${y}`;
@@ -157,6 +160,10 @@ function saveHabits(){
 
 /* ---------- cargar ---------- */
 function loadHabits(){
-  JSON.parse(localStorage.getItem('habits40')||'[]')
-    .forEach(h=>createCard(h.name,h.desc,h.startISO,h.completed));
+  const arr = JSON.parse(localStorage.getItem('habits40')||'[]');
+  arr.forEach(h=>{
+    /* si falta startISO o es inválido, ignora el registro antiguo */
+    if(!h.startISO || !/^\d{4}-\d{2}-\d{2}$/.test(h.startISO)) return;
+    createCard(h.name,h.desc,h.startISO,h.completed||[]);
+  });
 }
