@@ -45,6 +45,17 @@ h1{font-family:"Pacifico",cursive;font-size:4rem;letter-spacing:.5px;text-align:
 .day.missed{background:#d3d3d3;color:#666;text-decoration:line-through}
 .day.disabled{background:#eeeeee;color:#bbb;cursor:default}
 
+/* --- combinaciones con el hito 21 --------------------------------- */
+.day.milestone.disabled{       /* futuro aún no disponible */
+  background:#e4d4ec;          /* violeta muy suave */
+  color:#b4a4c6;
+}
+
+.day.milestone.missed{         /* día 21 omitido */
+  background:#c6a6e0;          /* violeta intermedio */
+  color:#fff;
+}
+
 /* --- footer --- */
 .footer{background:#2c3e50;color:#fff;padding:18px 0;text-align:center;margin-top:60px}
 .footer a{color:var(--mustard);text-decoration:none}
