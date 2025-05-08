@@ -9,13 +9,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- Firebase SDK (compat) -->
+  <!-- Firebase SDK compat -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
 
   <script>
-    /* Configuración con storageBucket corregido */
     const firebaseConfig = {
       apiKey: "AIzaSyD8xjRRUWma1JaoHouiCZIi7XghUykc_vw",
       authDomain: "rastrea-habitos.firebaseapp.com",
@@ -31,45 +30,56 @@
 </head>
 
 <body>
-  <!-- Caja de autenticación -->
-  <section id="authSection" class="auth-section">
-    <h2>Inicia sesión o regístrate</h2>
-    <div class="auth-form">
-      <input id="email" type="email" placeholder="Correo" />
-      <input id="pass"  type="password" placeholder="Contraseña" />
-      <button id="loginBtn" class="add-habit-btn">Entrar / Registrar</button>
-    </div>
-    <p id="authError" class="auth-error"></p>
-  </section>
+  <!-- Presentación -->
+  <header class="hero">
+    <h1 class="hero-title">Rastrea tus Hábitos</h1>
+    <p class="hero-sub">Convierte tus intenciones en acciones diarias y celebra cada logro.</p>
+    <button id="openModal" class="add-habit-btn">Empezar</button>
+  </header>
 
-  <!-- Contenido principal (se oculta hasta loguear) -->
-  <div class="container" id="appContainer" style="display:none">
-    <header>
-      <h1>Rastrea tus Hábitos</h1>
-      <p class="intro-text">🌱 ¡Bienvenido a tu rastreador de hábitos! 🙏</p>
-      <p class="intro-text">
-        Diseñado para convertir tus deseos en acciones diarias:
-        cada marca refleja tu <strong>disciplina</strong> y el propósito que te impulsa.
-      </p>
-      <p class="intro-text">Sé constante, avanza un día a la vez y celebra cada logro.</p>
-    </header>
+  <!-- Modal de acceso -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <span id="closeModal" class="close">&times;</span>
 
-    <!-- Acordeones -->
-    <section class="intro">
-      <button class="accordion">¿Por qué rastrear hábitos? 👇</button>
-      <div class="panel">
-        <p>Rastrear tus hábitos refuerza la disciplina, mantiene el enfoque
-           y aporta un sentido de logro diario.</p>
-        <p>La casilla <strong>21</strong> se destaca porque, tras 21&nbsp;días consecutivos,
-           el hábito se consolida a nivel neuronal.</p>
+      <div class="tabs">
+        <button id="tabLogin"  class="tab active">Iniciar sesión</button>
+        <button id="tabReg"    class="tab">Crear cuenta</button>
       </div>
 
-      <button class="accordion">Cómo utilizar esta herramienta 👇</button>
+      <!-- Login -->
+      <div id="loginPane" class="pane">
+        <input id="loginEmail" type="email" placeholder="Correo" />
+        <input id="loginPass"  type="password" placeholder="Contraseña" />
+        <button id="loginBtn" class="add-habit-btn">Entrar</button>
+      </div>
+
+      <!-- Registro -->
+      <div id="regPane" class="pane hidden">
+        <input id="regEmail" type="email" placeholder="Correo" />
+        <input id="regPass"  type="password" placeholder="Contraseña (mín. 6)" />
+        <button id="regBtn" class="add-habit-btn">Registrar</button>
+      </div>
+
+      <p id="authMsg" class="auth-msg"></p>
+    </div>
+  </div>
+
+  <!-- Contenedor de la app -->
+  <div class="container hidden" id="appContainer">
+    <section class="intro">
+      <!-- acordeones existentes -->
+      <button class="accordion">¿Por qué rastrear hábitos? 👇</button>
       <div class="panel">
-        <p>1.&nbsp;Escribe tu hábito y una descripción.<br>
-           2.&nbsp;Marca la casilla del día cuando lo completes.<br>
-           3.&nbsp;Celebra al llegar al día 21.<br>
-           4.&nbsp;Continúa hasta los 40 días si lo deseas.</p>
+        <p>Rastrear tus hábitos refuerza la disciplina, mantiene el enfoque y aporta un sentido de logro diario.</p>
+        <p>La casilla 21 marca el primer gran hito: 21 días consecutivos consolidan el hábito a nivel neuronal.</p>
+      </div>
+      <button class="accordion">Cómo usar la herramienta 👇</button>
+      <div class="panel">
+        <p>1. Escribe tu hábito y opcionalmente una descripción.<br>
+           2. Marca la casilla del día cuando completes tu hábito.<br>
+           3. Celebra al llegar al día 21.<br>
+           4. Continúa hasta 40 si deseas reforzarlo por completo.</p>
       </div>
     </section>
 
@@ -93,7 +103,6 @@
     <p>Por <a href="https://elikenny.com" target="_blank">elikenny</a></p>
   </footer>
 
-  <!-- Tu lógica -->
   <script src="script.js"></script>
 </body>
 </html>
