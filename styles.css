@@ -92,11 +92,12 @@ h1,h2,h3{margin:0}
 .footer a:hover{text-decoration:underline}
 
 .motiv{
-  background:var(--pastel);
-  padding:12px 16px;
+  background:#fff7cf;           /* amarillo muy suave */
+  border-left:6px solid var(--mustard);
+  padding:14px 18px;
   border-radius:6px;
-  margin:0 0 18px;
+  margin:0 0 20px;
   font-weight:700;
-  color:#24344d;
+  color:#463b00;
   text-align:center;
 }
