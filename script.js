@@ -1,34 +1,34 @@
 /******************************************************************
-*  Firebase (compat) inicializado en <index.html> -----------------
+* Firebase compat inicializado en index.html
 ******************************************************************/
 const db   = firebase.firestore();
 const auth = firebase.auth();
 
 /******************************************************************
-*  Variables globales de UI
+* Utilidades de fecha
+******************************************************************/
+const pad = n => (n < 10 ? '0' + n : '' + n);
+const dateOnly = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const toISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const todayISO = () => toISO(new Date());
+const fromISO = iso => { const [y,m,d]=iso.split('-').map(Number); return new Date(y,m-1,d); };
+
+/******************************************************************
+* Variables globales
 ******************************************************************/
 let modal, openBtn, closeBtn;
 let tabLogin, tabReg, paneLogin, paneReg, authMsg;
 let loginEmail, loginPass, regEmail, regPass, loginBtn, regBtn;
 
-let uid;                 // se asigna tras login
+let uid;
 let habitInput, descInput, list;
 
 /******************************************************************
-*  Utilidades de fecha
+* Puerta de entrada: setup()
 ******************************************************************/
-const pad = n => (n < 10 ? '0' + n : '' + n);
-const dateOnly = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-const toISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-const todayISO = () => toISO(new Date());
-const fromISO = iso => { const [y,m,d] = iso.split('-').map(Number); return new Date(y, m-1, d); };
+function setup(){
 
-/******************************************************************
-*  DOM READY: capturar elementos y asignar listeners
-******************************************************************/
-document.addEventListener('DOMContentLoaded', () => {
-
-  /* -------- Modal -------- */
+  /* --- capturar elementos del modal --- */
   modal     = document.getElementById('modal');
   openBtn   = document.getElementById('openModal');
   closeBtn  = document.getElementById('closeModal');
@@ -37,25 +37,17 @@ document.addEventListener('DOMContentLoaded', () => {
   closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
   window.addEventListener('click', e => { if(e.target === modal) modal.classList.add('hidden'); });
 
-  /* -------- Tabs dentro del modal -------- */
-  tabLogin   = document.getElementById('tabLogin');
-  tabReg     = document.getElementById('tabReg');
-  paneLogin  = document.getElementById('loginPane');
-  paneReg    = document.getElementById('regPane');
-  authMsg    = document.getElementById('authMsg');
+  /* --- tabs dentro del modal --- */
+  tabLogin  = document.getElementById('tabLogin');
+  tabReg    = document.getElementById('tabReg');
+  paneLogin = document.getElementById('loginPane');
+  paneReg   = document.getElementById('regPane');
+  authMsg   = document.getElementById('authMsg');
 
-  tabLogin.addEventListener('click', () => activateTab(true));
-  tabReg.addEventListener('click',   () => activateTab(false));
+  tabLogin.onclick = () => activateTab(true);
+  tabReg.onclick   = () => activateTab(false);
 
-  function activateTab(login){
-    tabLogin.classList.toggle('active', login);
-    tabReg.classList.toggle('active', !login);
-    paneLogin.classList.toggle('hidden', !login);
-    paneReg.classList.toggle('hidden',  login);
-    authMsg.textContent = '';
-  }
-
-  /* -------- Inputs y botones de auth -------- */
+  /* inputs / botones de auth */
   loginEmail = document.getElementById('loginEmail');
   loginPass  = document.getElementById('loginPass');
   regEmail   = document.getElementById('regEmail');
@@ -63,189 +55,144 @@ document.addEventListener('DOMContentLoaded', () => {
   loginBtn   = document.getElementById('loginBtn');
   regBtn     = document.getElementById('regBtn');
 
-  loginBtn.addEventListener('click', login);
-  regBtn.addEventListener('click', register);
-});
+  loginBtn.onclick = login;
+  regBtn.onclick   = register;
+
+  /* escucha de Auth */
+  auth.onAuthStateChanged(user=>{
+    if(!user) return;
+    uid = user.uid;
+    modal.classList.add('hidden');
+    document.querySelector('.hero').classList.add('hidden');
+    document.getElementById('appContainer').classList.remove('hidden');
+    initApp();
+  });
+}
 
 /******************************************************************
-*  Funciones de autenticación
+*  Tabs login / registro
+******************************************************************/
+function activateTab(login){
+  tabLogin.classList.toggle('active', login);
+  tabReg.classList.toggle('active', !login);
+  paneLogin.classList.toggle('hidden', !login);
+  paneReg.classList.toggle('hidden',  login);
+  authMsg.textContent = '';
+}
+
+/******************************************************************
+*  Funciones Auth
 ******************************************************************/
 function login(){
   const email = loginEmail.value.trim();
   const pass  = loginPass.value.trim();
-  if(!email || !pass){ authMsg.textContent = 'Completa los datos'; return; }
-  auth.signInWithEmailAndPassword(email, pass)
-      .catch(e => authMsg.textContent = translateError(e.code));
+  if(!email||!pass){ authMsg.textContent='Completa los datos'; return; }
+  auth.signInWithEmailAndPassword(email,pass)
+      .catch(e=> authMsg.textContent = translateError(e.code));
 }
-
 function register(){
   const email = regEmail.value.trim();
   const pass  = regPass.value.trim();
-  if(!email || !pass){ authMsg.textContent = 'Completa los datos'; return; }
-  auth.createUserWithEmailAndPassword(email, pass)
-      .catch(e => authMsg.textContent = translateError(e.code));
+  if(!email||!pass){ authMsg.textContent='Completa los datos'; return; }
+  auth.createUserWithEmailAndPassword(email,pass)
+      .catch(e=> authMsg.textContent = translateError(e.code));
 }
-
 function translateError(code){
-  const map = {
-    'auth/email-already-in-use' : 'Ese correo ya está registrado.',
-    'auth/weak-password'        : 'La contraseña debe tener mínimo 6 caracteres.',
-    'auth/invalid-credential'   : 'Credenciales incorrectas.',
-    'auth/invalid-email'        : 'Correo no válido.'
+  const map={
+    'auth/email-already-in-use':'Ese correo ya está registrado.',
+    'auth/weak-password':'La contraseña debe tener al menos 6 caracteres.',
+    'auth/invalid-credential':'Credenciales incorrectas.',
+    'auth/invalid-email':'Correo no válido.'
   };
-  return map[code] || code;
+  return map[code]||code;
 }
 
 /******************************************************************
-*  Tras iniciar sesión
-******************************************************************/
-auth.onAuthStateChanged(user=>{
-  if(!user) return;
-  uid = user.uid;
-
-  /* Ocultar hero + modal, mostrar app */
-  modal.classList.add('hidden');
-  document.querySelector('.hero').classList.add('hidden');
-  document.getElementById('appContainer').classList.remove('hidden');
-
-  initApp();
-});
-
-/******************************************************************
-*  Inicializar gestor de hábitos
+*  Gestor de hábitos
 ******************************************************************/
 function initApp(){
-  habitInput = document.getElementById('habitInput');
-  descInput  = document.getElementById('descInput');
-  list       = document.getElementById('habitList');
-
+  habitInput=document.getElementById('habitInput');
+  descInput =document.getElementById('descInput');
+  list      =document.getElementById('habitList');
   initAccordions();
   renderToday();
   loadHabits();
-
-  document.getElementById('addHabitButton').addEventListener('click', addHabit);
+  document.getElementById('addHabitButton').onclick = addHabit;
 }
-
-/* ---------- Acordeones ---------- */
 function initAccordions(){
   document.querySelectorAll('.accordion').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      btn.classList.toggle('active');
-      const p = btn.nextElementSibling;
-      p.style.display = p.style.display === 'block' ? 'none' : 'block';
-    });
+    btn.onclick=()=>{btn.classList.toggle('active');
+      const p=btn.nextElementSibling;
+      p.style.display=p.style.display==='block'?'none':'block';};
   });
 }
-
-/* ---------- Hoy ---------- */
 function renderToday(){
-  const d = dateOnly(new Date());
+  const d=dateOnly(new Date());
   document.getElementById('todayLabel').textContent =
     `Hoy es ${d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`;
 }
-
-/* ---------- Añadir hábito ---------- */
 function addHabit(){
-  const name = habitInput.value.trim();
-  if(!name){ alert('Escribe un hábito'); return; }
-  createCard(name, descInput.value.trim(), todayISO(), []);
-  habitInput.value = ''; descInput.value = '';
+  const name=habitInput.value.trim();
+  if(!name){alert('Escribe un hábito');return;}
+  createCard(name,descInput.value.trim(),todayISO(),[]);
+  habitInput.value=''; descInput.value='';
   saveHabits();
 }
-
-/* ---------- Crear tarjeta ---------- */
-function createCard(name, desc, isoStart, completed = []){
-  const card = document.createElement('div'); card.className = 'habit';
-
-  /* Cabecera */
-  const h3 = document.createElement('h3'); h3.textContent = name;
-  h3.ondblclick = () => inlineEdit(h3, 'Nuevo nombre');
-
-  const editBtn = button('Editar','edit-btn', () => inlineEdit(h3,'Nuevo nombre'));
-  const delBtn  = button('Eliminar','delete-btn', () => { card.remove(); saveHabits(); });
-
-  const header = document.createElement('header');
-  header.append(h3, editBtn, delBtn);
-  card.appendChild(header);
-
-  /* Descripción */
+function createCard(name,desc,iso,completed=[]){
+  const card=document.createElement('div');card.className='habit';
+  const h3=document.createElement('h3');h3.textContent=name;
+  h3.ondblclick=()=>editInline(h3,'Nuevo nombre');
+  const editB=btn('Editar','edit-btn',()=>editInline(h3,'Nuevo nombre'));
+  const delB =btn('Eliminar','delete-btn',()=>{card.remove();saveHabits();});
+  const head=document.createElement('header');head.append(h3,editB,delB);
+  card.appendChild(head);
   if(desc){
-    const p = document.createElement('p');
-    p.className = 'desc'; p.textContent = desc;
-    p.ondblclick = () => inlineEdit(p, 'Editar descripción');
-    card.appendChild(p);
-  }
-
-  /* Grid 40 días */
-  const grid = document.createElement('div'); grid.className = 'days';
-  const startDate = fromISO(isoStart);
-  const daysPassed = Math.floor((dateOnly(new Date()) - startDate) / 86400000);
-
+    const p=document.createElement('p');p.className='desc';p.textContent=desc;
+    p.ondblclick=()=>editInline(p,'Editar descripción');card.appendChild(p);}
+  const grid=document.createElement('div');grid.className='days';
+  const start=fromISO(iso);const dp=Math.floor((dateOnly(new Date())-start)/86400000);
   for(let i=1;i<=40;i++){
-    const cell = document.createElement('span');
-    cell.className = 'day' + (i===21 ? ' milestone' : '');
-    cell.textContent = i;
-
-    if(i-1 > daysPassed)         cell.classList.add('disabled');
-    if(completed.includes(i))    cell.classList.add('completed');
-
-    cell.addEventListener('click', ()=>{
-      if(cell.classList.contains('disabled')) return;
-      cell.classList.toggle('completed');
-      saveHabits();
-    });
-    grid.appendChild(cell);
-  }
+    const c=document.createElement('span');c.className='day'+(i===21?' milestone':'');c.textContent=i;
+    if(i-1>dp) c.classList.add('disabled');
+    if(completed.includes(i)) c.classList.add('completed');
+    c.onclick=()=>{if(c.classList.contains('disabled'))return;
+                   c.classList.toggle('completed');saveHabits();};
+    grid.appendChild(c);}
   card.appendChild(grid);
-
-  /* Fecha inicio */
-  const [y,m,d] = isoStart.split('-');
-  const startP = document.createElement('p');
-  startP.dataset.iso = isoStart;
-  startP.textContent = `Comenzado el ${d}/${m}/${y}`;
-  startP.style.cssText = 'font-size:.75rem;color:#666;margin-top:8px';
-  card.appendChild(startP);
-
-  list.prepend(card);
+  const [y,m,d]=iso.split('-');const s=document.createElement('p');
+  s.dataset.iso=iso;s.textContent=`Comenzado el ${d}/${m}/${y}`;
+  s.style.cssText='font-size:.75rem;color:#666;margin-top:8px';
+  card.appendChild(s);list.prepend(card);
 }
-
-function button(text, cls, fn){
-  const b = document.createElement('button');
-  b.className = cls; b.textContent = text; b.addEventListener('click', fn);
-  return b;
+function btn(text,cls,fn){
+  const b=document.createElement('button');
+  b.className=cls;b.textContent=text;b.onclick=fn;return b;
 }
-function inlineEdit(el,msg){
-  const v = prompt(msg, el.textContent);
-  if(v && v.trim()){ el.textContent = v.trim(); saveHabits(); }
+function editInline(el,msg){
+  const v=prompt(msg,el.textContent);
+  if(v&&v.trim()){el.textContent=v.trim();saveHabits();}
+}
+async function saveHabits(){
+  const arr=[];document.querySelectorAll('.habit').forEach(card=>{
+    const name = card.querySelector('h3').textContent;
+    const descE= card.querySelector('.desc'); const desc=descE?descE.textContent:'';
+    const iso  = card.querySelector('p').dataset.iso;
+    const comp=[];card.querySelectorAll('.day.completed').forEach(c=>comp.push(+c.textContent));
+    arr.push({name,desc,isoStart:iso,completed:comp});});
+  await db.collection('users').doc(uid).set({habits:arr});
+}
+async function loadHabits(){
+  const snap=await db.collection('users').doc(uid).get();
+  if(!snap.exists) return;
+  (snap.data().habits||[]).forEach(h=>createCard(
+    h.name,h.desc,h.isoStart,Array.isArray(h.completed)?h.completed:[]));
 }
 
 /******************************************************************
-*  Guardar / Cargar hábitos en Firestore
+*  Lanzar setup ahora mismo o en DOMContentLoaded
 ******************************************************************/
-async function saveHabits(){
-  const arr = [];
-  document.querySelectorAll('.habit').forEach(card=>{
-    const name = card.querySelector('h3').textContent;
-    const descE= card.querySelector('.desc');
-    const desc = descE ? descE.textContent : '';
-    const iso  = card.querySelector('p').dataset.iso;
-
-    const completed = [];
-    card.querySelectorAll('.day.completed').forEach(c=>completed.push(+c.textContent));
-
-    arr.push({name,desc,isoStart:iso,completed});
-  });
-  await db.collection('users').doc(uid).set({ habits: arr });
-}
-
-async function loadHabits(){
-  const snap = await db.collection('users').doc(uid).get();
-  if(!snap.exists) return;
-  const arr = snap.data().habits || [];
-  arr.forEach(h => createCard(
-    h.name,
-    h.desc,
-    h.isoStart,
-    Array.isArray(h.completed) ? h.completed : []
-  ));
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded', setup);
+}else{
+  setup();
 }
