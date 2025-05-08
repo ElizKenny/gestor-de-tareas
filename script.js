@@ -1,14 +1,14 @@
 /******************************************************************
-*  Firebase compat ya inicializado en index.html
+*  Firebase compat
 ******************************************************************/
 var db   = window._habitsDB   || (window._habitsDB   = firebase.firestore());
 var auth = window._habitsAuth || (window._habitsAuth = firebase.auth());
 
 /* ---------- Modal ---------- */
-const modal   = document.getElementById('modal');
-document.getElementById('openModal').onclick  = ()=>modal.classList.remove('hidden');
-document.getElementById('closeModal').onclick = ()=>modal.classList.add('hidden');
-window.onclick = e=>{ if(e.target===modal) modal.classList.add('hidden'); };
+const modal=document.getElementById('modal');
+document.getElementById('openModal').onclick=()=>modal.classList.remove('hidden');
+document.getElementById('closeModal').onclick=()=>modal.classList.add('hidden');
+window.onclick=e=>{if(e.target===modal)modal.classList.add('hidden');};
 
 /* ---------- Tabs ---------- */
 const tabL=document.getElementById('tabLogin');
@@ -16,8 +16,7 @@ const tabR=document.getElementById('tabReg');
 const paneL=document.getElementById('loginPane');
 const paneR=document.getElementById('regPane');
 const authMsg=document.getElementById('authMsg');
-
-function actTab(login=true){
+function actTab(login){
   tabL.classList.toggle('active',login);
   tabR.classList.toggle('active',!login);
   paneL.classList.toggle('hidden',!login);
@@ -30,8 +29,30 @@ tabR.onclick=()=>actTab(false);
 /* ---------- Login / Registro ---------- */
 const loginEmail=document.getElementById('loginEmail');
 const loginPass =document.getElementById('loginPass');
-const regEmail  =document.getElementById('regEmail');
-const regPass   =document.getElementById('regPass');
+const regName  =document.getElementById('regName');
+const regEmail =document.getElementById('regEmail');
+const regPass  =document.getElementById('regPass');
+
+document.getElementById('loginBtn').onclick = ()=>doAuth('login');
+document.getElementById('regBtn').onclick   = ()=>doAuth('reg');
+
+async function doAuth(mode){
+  const email = (mode==='login'?loginEmail:regEmail).value.trim();
+  const pass  = (mode==='login'?loginPass :regPass ).value.trim();
+  if(!email||!pass){authMsg.textContent='Completa los datos';return;}
+
+  try{
+    if(mode==='login'){
+      await auth.signInWithEmailAndPassword(email,pass);
+    }else{
+      const name = regName.value.trim();
+      if(!name){authMsg.textContent='Ingresa tu nombre';return;}
+      const cred = await auth.createUserWithEmailAndPassword(email,pass);
+      await cred.user.updateProfile({displayName:name});
+      await db.collection('users').doc(cred.user.uid).set({ profile:{name}, habits:[] });
+    }
+  }catch(e){authMsg.textContent=mapErr[e.code]||e.code;}
+}
 const mapErr={
   'auth/email-already-in-use':'Ese correo ya existe.',
   'auth/weak-password':'Contraseña mínima 6 caracteres.',
@@ -39,34 +60,27 @@ const mapErr={
   'auth/invalid-credential':'Credenciales incorrectas.'
 };
 
-document.getElementById('loginBtn').onclick =()=>doAuth('login');
-document.getElementById('regBtn').onclick   =()=>doAuth('reg');
-
-async function doAuth(mode){
-  const email=(mode==='login'?loginEmail:regEmail).value.trim();
-  const pass =(mode==='login'?loginPass :regPass ).value.trim();
-  if(!email||!pass){authMsg.textContent='Completa los datos';return;}
-  try{
-    if(mode==='login') await auth.signInWithEmailAndPassword(email,pass);
-    else               await auth.createUserWithEmailAndPassword(email,pass);
-  }catch(e){authMsg.textContent=mapErr[e.code]||e.code;}
-}
-
 /* ---------- Logout ---------- */
 const logoutBtn=document.getElementById('logoutBtn');
 logoutBtn.onclick = async ()=>{
-  logoutBtn.disabled=true;
-  await saveHabits();          // asegura guardar antes de salir
+  logoutBtn.style.opacity=.5;
+  await saveHabits();
   await auth.signOut();
-  logoutBtn.disabled=false;
+  logoutBtn.style.opacity=1;
 };
 
 /* ---------- Cambio de estado ---------- */
 let uid;
-auth.onAuthStateChanged(user=>{
+auth.onAuthStateChanged(async user=>{
   if(user){
     uid=user.uid;
-    document.getElementById('greeting').textContent = `Hola, ${user.email}`;
+    // buscar nombre en displayName o Firestore
+    let name=user.displayName;
+    if(!name){
+      const snap=await db.collection('users').doc(uid).get();
+      name = snap.exists && snap.data().profile ? snap.data().profile.name : '';
+    }
+    document.getElementById('greeting').textContent = name ? `Hola, ${name}` : 'Hola';
     modal.classList.add('hidden');
     document.querySelector('.hero').classList.add('hidden');
     document.getElementById('appContainer').classList.remove('hidden');
@@ -98,7 +112,6 @@ function initApp(){
   initAccordions(); renderToday(); loadHabits();
   document.getElementById('addHabitButton').onclick=addHabit;
 }
-/* acordeones */
 function initAccordions(){
   document.querySelectorAll('.accordion').forEach(btn=>{
     btn.onclick=()=>{btn.classList.toggle('active');
@@ -106,7 +119,6 @@ function initAccordions(){
       p.style.display=p.style.display==='block'?'none':'block';};
   });
 }
-/* etiqueta hoy */
 function renderToday(){
   const d=dateOnly(new Date());
   document.getElementById('todayLabel').textContent=
@@ -122,18 +134,18 @@ function createCard(name,desc,iso,completed=[]){
   const card=document.createElement('div');card.className='habit';
   const h3=document.createElement('h3');h3.textContent=name;
   h3.ondblclick=()=>inlineEdit(h3,'Nuevo nombre');
-  card.append(header(
-    makeBtn('Editar','edit-btn',()=>inlineEdit(h3,'Nuevo nombre')),
-    makeBtn('Eliminar','delete-btn',()=>{card.remove();saveHabits();})
-  ));
-  card.prepend(h3);
+  const header=document.createElement('header');
+  header.appendChild(h3);
+  header.appendChild(btn('Editar','edit-btn',()=>inlineEdit(h3,'Nuevo nombre')));
+  header.appendChild(btn('Eliminar','delete-btn',()=>{card.remove();saveHabits();}));
+  card.appendChild(header);
   if(desc){
     const p=document.createElement('p');p.className='desc';p.textContent=desc;
-    p.ondblclick=()=>inlineEdit(p,'Editar descripción');card.appendChild(p);
+    p.ondblclick=()=>inlineEdit(p,'Editar descripción');
+    card.appendChild(p);
   }
   const grid=document.createElement('div');grid.className='days';
-  const start=fromISO(iso);
-  const passed=Math.floor((dateOnly(new Date())-start)/86400000);
+  const start=fromISO(iso);const passed=Math.floor((dateOnly(new Date())-start)/86400000);
   for(let i=1;i<=40;i++){
     const c=document.createElement('span');
     c.className='day'+(i===21?' milestone':'');c.textContent=i;
@@ -152,23 +164,21 @@ function createCard(name,desc,iso,completed=[]){
   card.appendChild(info);
   list.prepend(card);
 }
-function header(...els){const h=document.createElement('header');els.forEach(e=>h.appendChild(e));return h;}
-function makeBtn(t,c,f){const b=document.createElement('button');b.className=c;b.textContent=t;b.onclick=f;return b;}
-function inlineEdit(el,msg){
-  const v=prompt(msg,el.textContent);
-  if(v&&v.trim()){el.textContent=v.trim();saveHabits();}
-}
+function btn(t,c,f){const b=document.createElement('button');b.className=c;b.textContent=t;b.onclick=f;return b;}
+function inlineEdit(el,msg){const v=prompt(msg,el.textContent);
+  if(v&&v.trim()){el.textContent=v.trim();saveHabits();}}
+
 async function saveHabits(){
-  const arr=[];
-  document.querySelectorAll('.habit').forEach(card=>{
+  const arr=[];document.querySelectorAll('.habit').forEach(card=>{
     const name=card.querySelector('h3').textContent;
     const descE=card.querySelector('.desc');const desc=descE?descE.textContent:'';
     const iso=card.querySelector('p').dataset.iso;
     const comp=[];card.querySelectorAll('.day.completed').forEach(c=>comp.push(+c.textContent));
     arr.push({name,desc,isoStart:iso,completed:comp});
   });
-  await db.collection('users').doc(uid).set({habits:arr});
+  await db.collection('users').doc(uid).set({profile:{},habits:arr},{merge:true});
 }
+
 async function loadHabits(){
   const snap=await db.collection('users').doc(uid).get();
   if(!snap.exists) return;

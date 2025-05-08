@@ -290,7 +290,6 @@ h1 {
   margin:0; font-size:2.2rem;
 }
 
-/* saludo + botón */
 .user-bar{
   display:flex; gap:12px; align-items:center; font-size:.9rem;
 }
@@ -300,4 +299,4 @@ h1 {
   background:none; border:none; color:#666;
   font-size:.8rem; cursor:pointer; padding:4px 8px;
 }
-.logout-btn:hover{ text-decoration:underline; color:#000; }
+.logout-btn:hover{ color:var(--mustard-dark); }
