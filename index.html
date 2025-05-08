@@ -5,17 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rastreo de Hábitos</title>
 
-  <!-- Fuentes -->
+  <!-- Fuentes y estilos -->
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- Firebase SDK compat -->
+  <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
 
   <script>
-    /* ← tu configuración (storageBucket corregido) */
+    /* Configuración con storageBucket corregido */
     const firebaseConfig = {
       apiKey: "AIzaSyD8xjRRUWma1JaoHouiCZIi7XghUykc_vw",
       authDomain: "rastrea-habitos.firebaseapp.com",
@@ -31,14 +31,19 @@
 </head>
 
 <body>
-  <div id="loginBox" class="login-box">
+  <!-- Caja de autenticación -->
+  <section id="authSection" class="auth-section">
     <h2>Inicia sesión o regístrate</h2>
-    <input id="email" type="email" placeholder="Correo" />
-    <input id="pass"  type="password" placeholder="Contraseña" />
-    <button id="loginBtn">Entrar / Registrar</button>
-  </div>
+    <div class="auth-form">
+      <input id="email" type="email" placeholder="Correo" />
+      <input id="pass"  type="password" placeholder="Contraseña" />
+      <button id="loginBtn" class="add-habit-btn">Entrar / Registrar</button>
+    </div>
+    <p id="authError" class="auth-error"></p>
+  </section>
 
-  <div class="container" id="appBox" style="display:none">
+  <!-- Contenido principal (se oculta hasta loguear) -->
+  <div class="container" id="appContainer" style="display:none">
     <header>
       <h1>Rastrea tus Hábitos</h1>
       <p class="intro-text">🌱 ¡Bienvenido a tu rastreador de hábitos! 🙏</p>
@@ -50,10 +55,22 @@
     </header>
 
     <!-- Acordeones -->
-    <!-- (el resto de tu HTML se mantiene igual) -->
-    <!-- ... -->
     <section class="intro">
-      <!-- botones y paneles ya copiados arriba, omitidos aquí por brevedad -->
+      <button class="accordion">¿Por qué rastrear hábitos? 👇</button>
+      <div class="panel">
+        <p>Rastrear tus hábitos refuerza la disciplina, mantiene el enfoque
+           y aporta un sentido de logro diario.</p>
+        <p>La casilla <strong>21</strong> se destaca porque, tras 21&nbsp;días consecutivos,
+           el hábito se consolida a nivel neuronal.</p>
+      </div>
+
+      <button class="accordion">Cómo utilizar esta herramienta 👇</button>
+      <div class="panel">
+        <p>1.&nbsp;Escribe tu hábito y una descripción.<br>
+           2.&nbsp;Marca la casilla del día cuando lo completes.<br>
+           3.&nbsp;Celebra al llegar al día 21.<br>
+           4.&nbsp;Continúa hasta los 40 días si lo deseas.</p>
+      </div>
     </section>
 
     <!-- Formulario -->
@@ -70,11 +87,13 @@
     <p id="todayLabel" class="today-label"></p>
   </div>
 
+  <!-- Footer -->
   <footer class="footer">
     <p>Creado con 🤍</p>
     <p>Por <a href="https://elikenny.com" target="_blank">elikenny</a></p>
   </footer>
 
+  <!-- Tu lógica -->
   <script src="script.js"></script>
 </body>
 </html>

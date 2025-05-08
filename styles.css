@@ -193,3 +193,28 @@ h1 {
   background:#e4d4ec;   /* violeta suave */
   color:#7b6b8f;
 }
+/* ---------- Login ---------- */
+.auth-section{
+  max-width: 960px;
+  margin: 40px auto 0;
+  text-align: center;
+}
+.auth-form{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+.auth-form input{
+  padding: 10px 14px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 1rem;
+  flex: 1 1 220px;
+}
+.auth-error{
+  color:#e74c3c;
+  font-size:.9rem;
+  margin-top:10px;
+}
