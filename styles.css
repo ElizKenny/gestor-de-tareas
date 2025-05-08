@@ -188,3 +188,8 @@ h1 {
 .footer a:hover {
   text-decoration: underline;
 }
+/* justo debajo de .day.milestone { … } */
+.day.milestone.disabled{
+  background:#e4d4ec;   /* violeta suave */
+  color:#7b6b8f;
+}
