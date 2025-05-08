@@ -266,3 +266,26 @@ h1 {
 
 /* ---------- Utilidades ---------- */
 .hidden{ display:none; }
+
+
+/* botón salir */
+.logout-btn{
+  background:#e74c3c;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  padding:8px 16px;
+  cursor:pointer;
+  font-size:.85rem; font-weight:700;
+}
+.logout-btn:hover{ background:#c0392b; }
+
+.app-header{
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:28px;
+}
+.app-title{
+  font-family:"Pacifico",cursive;
+  color:#24344d;
+  margin:0; font-size:2.2rem;
+}
