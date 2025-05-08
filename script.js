@@ -53,23 +53,28 @@ async function doAuth(mode){
 }
 
 /* ---------- Logout ---------- */
-document.getElementById('logoutBtn').onclick = ()=>auth.signOut();
+const logoutBtn=document.getElementById('logoutBtn');
+logoutBtn.onclick = async ()=>{
+  logoutBtn.disabled=true;
+  await saveHabits();          // asegura guardar antes de salir
+  await auth.signOut();
+  logoutBtn.disabled=false;
+};
 
 /* ---------- Cambio de estado ---------- */
 let uid;
 auth.onAuthStateChanged(user=>{
   if(user){
     uid=user.uid;
+    document.getElementById('greeting').textContent = `Hola, ${user.email}`;
     modal.classList.add('hidden');
     document.querySelector('.hero').classList.add('hidden');
     document.getElementById('appContainer').classList.remove('hidden');
     initApp();
   }else{
-    // vuelve a la vista inicial sin recargar
     document.querySelector('.hero').classList.remove('hidden');
     document.getElementById('appContainer').classList.add('hidden');
     document.getElementById('habitList').innerHTML='';
-    actTab(true);                // pestaña login por defecto
   }
 });
 
@@ -118,14 +123,13 @@ function createCard(name,desc,iso,completed=[]){
   const h3=document.createElement('h3');h3.textContent=name;
   h3.ondblclick=()=>inlineEdit(h3,'Nuevo nombre');
   card.append(header(
-    h3,
     makeBtn('Editar','edit-btn',()=>inlineEdit(h3,'Nuevo nombre')),
     makeBtn('Eliminar','delete-btn',()=>{card.remove();saveHabits();})
   ));
+  card.prepend(h3);
   if(desc){
     const p=document.createElement('p');p.className='desc';p.textContent=desc;
-    p.ondblclick=()=>inlineEdit(p,'Editar descripción');
-    card.appendChild(p);
+    p.ondblclick=()=>inlineEdit(p,'Editar descripción');card.appendChild(p);
   }
   const grid=document.createElement('div');grid.className='days';
   const start=fromISO(iso);
@@ -148,17 +152,21 @@ function createCard(name,desc,iso,completed=[]){
   card.appendChild(info);
   list.prepend(card);
 }
-/* helpers */
 function header(...els){const h=document.createElement('header');els.forEach(e=>h.appendChild(e));return h;}
 function makeBtn(t,c,f){const b=document.createElement('button');b.className=c;b.textContent=t;b.onclick=f;return b;}
-function inlineEdit(el,msg){const v=prompt(msg,el.textContent);if(v&&v.trim()){el.textContent=v.trim();saveHabits();}}
+function inlineEdit(el,msg){
+  const v=prompt(msg,el.textContent);
+  if(v&&v.trim()){el.textContent=v.trim();saveHabits();}
+}
 async function saveHabits(){
-  const arr=[];document.querySelectorAll('.habit').forEach(card=>{
+  const arr=[];
+  document.querySelectorAll('.habit').forEach(card=>{
     const name=card.querySelector('h3').textContent;
     const descE=card.querySelector('.desc');const desc=descE?descE.textContent:'';
     const iso=card.querySelector('p').dataset.iso;
     const comp=[];card.querySelectorAll('.day.completed').forEach(c=>comp.push(+c.textContent));
-    arr.push({name,desc,isoStart:iso,completed:comp});});
+    arr.push({name,desc,isoStart:iso,completed:comp});
+  });
   await db.collection('users').doc(uid).set({habits:arr});
 }
 async function loadHabits(){

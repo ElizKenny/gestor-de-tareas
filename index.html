@@ -30,14 +30,14 @@
 </head>
 
 <body>
-  <!-- Presentación -->
+  <!-- Héroe inicial -->
   <header class="hero">
     <h1 class="hero-title">Rastrea tus Hábitos</h1>
     <p class="hero-sub">Convierte tus intenciones en acciones diarias y celebra cada logro.</p>
     <button id="openModal" class="add-habit-btn">Empezar</button>
   </header>
 
-  <!-- Modal -->
+  <!-- Modal de acceso -->
   <div id="modal" class="modal hidden">
     <div class="modal-content">
       <span id="closeModal" class="close">&times;</span>
@@ -47,12 +47,14 @@
         <button id="tabReg"   class="tab">Crear cuenta</button>
       </div>
 
+      <!-- Login -->
       <div id="loginPane" class="pane">
         <input id="loginEmail" type="email" placeholder="Correo" />
         <input id="loginPass"  type="password" placeholder="Contraseña" />
         <button id="loginBtn"  class="add-habit-btn">Entrar</button>
       </div>
 
+      <!-- Registro -->
       <div id="regPane" class="pane hidden">
         <input id="regEmail" type="email" placeholder="Correo" />
         <input id="regPass"  type="password" placeholder="Contraseña (mín. 6)" />
@@ -67,9 +69,15 @@
   <div class="container hidden" id="appContainer">
     <header class="app-header">
       <h2 class="app-title">Rastrea tus Hábitos</h2>
-      <button id="logoutBtn" class="logout-btn">Cerrar sesión</button>
+
+      <!-- Barra de usuario -->
+      <div class="user-bar">
+        <span id="greeting"></span>
+        <button id="logoutBtn" class="logout-btn">Cerrar&nbsp;sesión</button>
+      </div>
     </header>
 
+    <!-- Acordeones -->
     <section class="intro">
       <button class="accordion">¿Por qué rastrear hábitos? 👇</button>
       <div class="panel">
@@ -84,16 +92,20 @@
       <button class="accordion">Cómo utilizar esta herramienta 👇</button>
       <div class="panel">
         <p>
-          1.&nbsp;Escribe el hábito que deseas integrar y una breve descripción que te motive.<br>
+          1.&nbsp;Escribe el hábito que deseas integrar y, si quieres, una descripción.<br>
           2.&nbsp;Marca la casilla del día cuando hayas completado el hábito.<br>
           3.&nbsp;Celebra al llegar al día 21 🎉.<br>
-          4.&nbsp;Continúa hasta los <strong>40 días</strong> si quieres reforzar la rutina.<br>
+          4.&nbsp;Continúa hasta los <strong>40 días</strong> si deseas reforzar la rutina.<br>
           5.&nbsp;¡Puedes crear y rastrear tantos hábitos como quieras!
         </p>
-        <p>La disciplina diaria genera progreso constante. ¡Comparte tus logros y mantén la motivación! 💪</p>
+        <p>
+          La disciplina diaria genera progreso constante. ¡Comparte tus logros y mantén la motivación! 💪<br>
+          ¿Tienes sugerencias o comentarios? ¡Escríbeme! 😊
+        </p>
       </div>
     </section>
 
+    <!-- Formulario -->
     <section class="habit-form-container">
       <div class="habit-form">
         <input id="habitInput" type="text" placeholder="Nuevo hábito" />
@@ -102,15 +114,18 @@
       </div>
     </section>
 
+    <!-- Lista de hábitos -->
     <section id="habitList" class="habit-list"></section>
     <p id="todayLabel" class="today-label"></p>
   </div>
 
+  <!-- Footer -->
   <footer class="footer">
     <p>Creado con 🤍</p>
     <p>Por <a href="https://elikenny.com" target="_blank">elikenny</a></p>
   </footer>
 
+  <!-- Lógica -->
   <script src="script.js"></script>
 </body>
 </html>
