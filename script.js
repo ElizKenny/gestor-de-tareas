@@ -11,34 +11,23 @@ document.getElementById('closeModal').onclick = ()=>modal.classList.add('hidden'
 window.onclick = e=>{ if(e.target===modal) modal.classList.add('hidden'); };
 
 /* ---------- Tabs ---------- */
-function actTab(login){
+const tabL=document.getElementById('tabLogin');
+const tabR=document.getElementById('tabReg');
+const paneL=document.getElementById('loginPane');
+const paneR=document.getElementById('regPane');
+const authMsg=document.getElementById('authMsg');
+
+function actTab(login=true){
   tabL.classList.toggle('active',login);
   tabR.classList.toggle('active',!login);
   paneL.classList.toggle('hidden',!login);
   paneR.classList.toggle('hidden', login);
   authMsg.textContent='';
 }
-const tabL=document.getElementById('tabLogin');
-const tabR=document.getElementById('tabReg');
-const paneL=document.getElementById('loginPane');
-const paneR=document.getElementById('regPane');
-const authMsg=document.getElementById('authMsg');
 tabL.onclick=()=>actTab(true);
 tabR.onclick=()=>actTab(false);
 
 /* ---------- Login / Registro ---------- */
-document.getElementById('loginBtn').onclick=()=>doAuth('login');
-document.getElementById('regBtn').onclick  =()=>doAuth('reg');
-
-async function doAuth(mode){
-  const email = (mode==='login'?loginEmail:regEmail).value.trim();
-  const pass  = (mode==='login'?loginPass:regPass).value.trim();
-  if(!email||!pass){authMsg.textContent='Completa los datos';return;}
-  try{
-    if(mode==='login') await auth.signInWithEmailAndPassword(email,pass);
-    else               await auth.createUserWithEmailAndPassword(email,pass);
-  }catch(e){authMsg.textContent=mapErr[e.code]||e.code;}
-}
 const loginEmail=document.getElementById('loginEmail');
 const loginPass =document.getElementById('loginPass');
 const regEmail  =document.getElementById('regEmail');
@@ -50,28 +39,52 @@ const mapErr={
   'auth/invalid-credential':'Credenciales incorrectas.'
 };
 
+document.getElementById('loginBtn').onclick =()=>doAuth('login');
+document.getElementById('regBtn').onclick   =()=>doAuth('reg');
+
+async function doAuth(mode){
+  const email=(mode==='login'?loginEmail:regEmail).value.trim();
+  const pass =(mode==='login'?loginPass :regPass ).value.trim();
+  if(!email||!pass){authMsg.textContent='Completa los datos';return;}
+  try{
+    if(mode==='login') await auth.signInWithEmailAndPassword(email,pass);
+    else               await auth.createUserWithEmailAndPassword(email,pass);
+  }catch(e){authMsg.textContent=mapErr[e.code]||e.code;}
+}
+
 /* ---------- Logout ---------- */
 document.getElementById('logoutBtn').onclick = ()=>auth.signOut();
 
-/* ---------- Después de login ---------- */
+/* ---------- Cambio de estado ---------- */
 let uid;
 auth.onAuthStateChanged(user=>{
-  if(!user){ /* volvió a login */ location.reload(); return; }
-  uid=user.uid;
-  modal.classList.add('hidden');
-  document.querySelector('.hero').classList.add('hidden');
-  document.getElementById('appContainer').classList.remove('hidden');
-  initApp();
+  if(user){
+    uid=user.uid;
+    modal.classList.add('hidden');
+    document.querySelector('.hero').classList.add('hidden');
+    document.getElementById('appContainer').classList.remove('hidden');
+    initApp();
+  }else{
+    // vuelve a la vista inicial sin recargar
+    document.querySelector('.hero').classList.remove('hidden');
+    document.getElementById('appContainer').classList.add('hidden');
+    document.getElementById('habitList').innerHTML='';
+    actTab(true);                // pestaña login por defecto
+  }
 });
 
-/* ---------- Utilidades de fecha ---------- */
+/******************************************************************
+*  Utilidades de fecha
+******************************************************************/
 const pad=n=>n<10?'0'+n:n;
 const dateOnly=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
 const toISO=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const todayISO=()=>toISO(new Date());
 const fromISO=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c);};
 
-/* ---------- Gestor de hábitos ---------- */
+/******************************************************************
+*  Gestor de hábitos
+******************************************************************/
 let habitInput,descInput,list;
 function initApp(){
   habitInput=document.getElementById('habitInput');
@@ -80,6 +93,7 @@ function initApp(){
   initAccordions(); renderToday(); loadHabits();
   document.getElementById('addHabitButton').onclick=addHabit;
 }
+/* acordeones */
 function initAccordions(){
   document.querySelectorAll('.accordion').forEach(btn=>{
     btn.onclick=()=>{btn.classList.toggle('active');
@@ -87,6 +101,7 @@ function initAccordions(){
       p.style.display=p.style.display==='block'?'none':'block';};
   });
 }
+/* etiqueta hoy */
 function renderToday(){
   const d=dateOnly(new Date());
   document.getElementById('todayLabel').textContent=
@@ -102,28 +117,40 @@ function createCard(name,desc,iso,completed=[]){
   const card=document.createElement('div');card.className='habit';
   const h3=document.createElement('h3');h3.textContent=name;
   h3.ondblclick=()=>inlineEdit(h3,'Nuevo nombre');
-  const edit=btn('Editar','edit-btn',()=>inlineEdit(h3,'Nuevo nombre'));
-  const del =btn('Eliminar','delete-btn',()=>{card.remove();saveHabits();});
-  card.append(header(h3,edit,del));
+  card.append(header(
+    h3,
+    makeBtn('Editar','edit-btn',()=>inlineEdit(h3,'Nuevo nombre')),
+    makeBtn('Eliminar','delete-btn',()=>{card.remove();saveHabits();})
+  ));
   if(desc){
     const p=document.createElement('p');p.className='desc';p.textContent=desc;
-    p.ondblclick=()=>inlineEdit(p,'Editar descripción');card.appendChild(p);}
-  const g=document.createElement('div');g.className='days';
-  const start=fromISO(iso);const dp=Math.floor((dateOnly(new Date())-start)/86400000);
-  for(let i=1;i<=40;i++){const c=document.createElement('span');
+    p.ondblclick=()=>inlineEdit(p,'Editar descripción');
+    card.appendChild(p);
+  }
+  const grid=document.createElement('div');grid.className='days';
+  const start=fromISO(iso);
+  const passed=Math.floor((dateOnly(new Date())-start)/86400000);
+  for(let i=1;i<=40;i++){
+    const c=document.createElement('span');
     c.className='day'+(i===21?' milestone':'');c.textContent=i;
-    if(i-1>dp)c.classList.add('disabled');
-    if(completed.includes(i))c.classList.add('completed');
+    if(i-1>passed) c.classList.add('disabled');
+    if(completed.includes(i)) c.classList.add('completed');
     c.onclick=()=>{if(c.classList.contains('disabled'))return;
-      c.classList.toggle('completed');saveHabits();};
-    g.appendChild(c);}card.appendChild(g);
-  const [y,m,d]=iso.split('-');const info=document.createElement('p');
-  info.dataset.iso=iso;info.textContent=`Comenzado el ${d}/${m}/${y}`;
+                   c.classList.toggle('completed');saveHabits();};
+    grid.appendChild(c);
+  }
+  card.appendChild(grid);
+  const info=document.createElement('p');
+  info.dataset.iso=iso;
+  const [y,m,d]=iso.split('-');
+  info.textContent=`Comenzado el ${d}/${m}/${y}`;
   info.style.cssText='font-size:.75rem;color:#666;margin-top:8px';
-  card.appendChild(info); list.prepend(card);
+  card.appendChild(info);
+  list.prepend(card);
 }
+/* helpers */
 function header(...els){const h=document.createElement('header');els.forEach(e=>h.appendChild(e));return h;}
-function btn(t,c,f){const b=document.createElement('button');b.className=c;b.textContent=t;b.onclick=f;return b;}
+function makeBtn(t,c,f){const b=document.createElement('button');b.className=c;b.textContent=t;b.onclick=f;return b;}
 function inlineEdit(el,msg){const v=prompt(msg,el.textContent);if(v&&v.trim()){el.textContent=v.trim();saveHabits();}}
 async function saveHabits(){
   const arr=[];document.querySelectorAll('.habit').forEach(card=>{
