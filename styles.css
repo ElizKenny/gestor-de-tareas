@@ -41,21 +41,7 @@ h1,h2,h3{margin:0}
 .app-title{font-family:Pacifico,cursive;font-size:2.3rem;color:#24344d}
 .user-bar{display:flex;gap:12px;align-items:center;font-size:.9rem}
 #greeting{color:#555}
-/* botón Cerrar sesión */
-.logout-btn{
-  background:none;
-  border:none;
-  color:#666;
-  font-size:.82rem;
-  cursor:pointer;
-  padding:4px 8px;
-  border-radius:4px;
-  transition:background .2s,color .2s;
-}
-.logout-btn:hover{
-  background:var(--mustard);
-  color:#fff;
-}
+
 
 /* ---------- ACORDEONES ---------- */
 .accordion{width:100%;padding:15px 20px;margin-top:18px;font-size:1rem;text-align:left;
@@ -91,13 +77,36 @@ h1,h2,h3{margin:0}
 .footer a{color:var(--mustard);text-decoration:none}
 .footer a:hover{text-decoration:underline}
 
-.motiv{
-  background:#fff7cf;           /* amarillo muy suave */
-  border-left:6px solid var(--mustard);
-  padding:14px 18px;
+
+/* ── 1. BOTÓN CERRAR SESIÓN ─────────────────────────── */
+.logout-btn{
+  background:#ececec;          /* neutro visible todo el tiempo  */
+  border:none;
+  color:#444;
+  font-size:.82rem;
+  cursor:pointer;
+  padding:6px 14px;
   border-radius:6px;
-  margin:0 0 20px;
+  transition:background .2s,color .2s;
+}
+.logout-btn:hover{
+  background:var(--mustard);
+  color:#fff;
+}
+
+/* ── 2. LOGO / TÍTULO MÁS PEQUEÑO EN MÓVIL ───────────── */
+@media(max-width:480px){
+  .hero-title{font-size:2.4rem;}
+  .app-title{font-size:1.7rem;}
+}
+
+/* ── 3. MENSAJE MOTIVACIONAL SIN FONDO ───────────────── */
+.motiv{
+  margin:0 0 22px;
   font-weight:700;
   color:#463b00;
   text-align:center;
+  /* se eliminan background y borde */
+  background:none;
+  border:none;
 }
