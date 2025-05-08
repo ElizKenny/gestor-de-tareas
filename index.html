@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rastreo de Hábitos</title>
 
-  <!-- Favicon “vacío” para evitar 404 -->
+  <!-- Favicon vacío para evitar 404 -->
   <link rel="icon" href="data:," />
 
-  <!-- Fuentes + hoja de estilos -->
+  <!-- Fuentes Google + hoja de estilos -->
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 
@@ -30,14 +30,14 @@
 </head>
 
 <body>
-  <!-- Hero -->
+  <!-- Hero de bienvenida -->
   <header class="hero">
     <h1 class="hero-title">Rastrea tus Hábitos</h1>
     <p class="hero-sub">Convierte tus intenciones en acciones diarias y celebra cada logro.</p>
     <button id="openModal" class="add-habit-btn">Empezar</button>
   </header>
 
-  <!-- Modal acceso -->
+  <!-- Modal login/registro -->
   <div id="modal" class="modal hidden">
     <div class="modal-content">
       <span id="closeModal" class="close">&times;</span>
@@ -47,14 +47,14 @@
         <button id="tabReg"   class="tab">Crear cuenta</button>
       </div>
 
-      <!-- Login -->
+      <!-- Pane login -->
       <div id="loginPane" class="pane">
         <input id="loginEmail" type="email" placeholder="Correo" />
         <input id="loginPass"  type="password" placeholder="Contraseña" />
         <button id="loginBtn"  class="add-habit-btn full">Entrar</button>
       </div>
 
-      <!-- Registro -->
+      <!-- Pane registro -->
       <div id="regPane" class="pane hidden">
         <input id="regName"  type="text"  placeholder="Tu nombre" />
         <input id="regEmail" type="email" placeholder="Correo" />
@@ -66,8 +66,10 @@
     </div>
   </div>
 
-  <!-- App -->
+  <!-- CONTENEDOR PRINCIPAL -->
   <div class="container hidden" id="appContainer">
+
+    <!-- Cabecera app -->
     <header class="app-header">
       <h2 class="app-title">Rastrea tus Hábitos</h2>
       <div class="user-bar">
@@ -76,8 +78,13 @@
       </div>
     </header>
 
-    <!-- Acordeones -->
+    <!-- LISTA de hábitos (quedará arriba) -->
+    <section id="habitList" class="habit-list"></section>
+
+    <!-- ACORDEONES + texto motivacional -->
     <section class="intro">
+      <p class="motiv">✨ ¡Vuelve cada día y marca tu progreso para ver cómo creces! ✨</p>
+
       <button class="accordion">¿Por qué rastrear hábitos? 👇</button>
       <div class="panel">
         <p>Rastrear tus hábitos refuerza la disciplina, mantiene tu enfoque y aporta un sentido de logro diario.</p>
@@ -105,8 +112,6 @@
       </div>
     </section>
 
-    <!-- Lista -->
-    <section id="habitList" class="habit-list"></section>
     <p id="todayLabel" class="today-label"></p>
   </div>
 

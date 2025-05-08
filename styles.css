@@ -41,8 +41,21 @@ h1,h2,h3{margin:0}
 .app-title{font-family:Pacifico,cursive;font-size:2.3rem;color:#24344d}
 .user-bar{display:flex;gap:12px;align-items:center;font-size:.9rem}
 #greeting{color:#555}
-.logout-btn{background:none;border:none;color:#666;font-size:.82rem;cursor:pointer;padding:4px 8px}
-.logout-btn:hover{color:var(--mustard-dark)}
+/* botón Cerrar sesión */
+.logout-btn{
+  background:none;
+  border:none;
+  color:#666;
+  font-size:.82rem;
+  cursor:pointer;
+  padding:4px 8px;
+  border-radius:4px;
+  transition:background .2s,color .2s;
+}
+.logout-btn:hover{
+  background:var(--mustard);
+  color:#fff;
+}
 
 /* ---------- ACORDEONES ---------- */
 .accordion{width:100%;padding:15px 20px;margin-top:18px;font-size:1rem;text-align:left;
@@ -77,3 +90,13 @@ h1,h2,h3{margin:0}
 .footer{background:#2c3e50;color:#fff;text-align:center;padding:18px 0;margin-top:70px}
 .footer a{color:var(--mustard);text-decoration:none}
 .footer a:hover{text-decoration:underline}
+
+.motiv{
+  background:var(--pastel);
+  padding:12px 16px;
+  border-radius:6px;
+  margin:0 0 18px;
+  font-weight:700;
+  color:#24344d;
+  text-align:center;
+}
