@@ -1,8 +1,8 @@
 /******************************************************************
 *  Firebase compat ya inicializado en index.html
 ******************************************************************/
-const db   = firebase.firestore();
-const auth = firebase.auth();
+const db   = window._habitsDB   || (window._habitsDB   = firebase.firestore());
+const auth = window._habitsAuth || (window._habitsAuth = firebase.auth());
 
 /******************************************************************
 *  MODAL — abrir / cerrar
