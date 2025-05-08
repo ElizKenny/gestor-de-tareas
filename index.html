@@ -5,27 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rastreo de Hábitos</title>
 
+  <!-- Favicon “vacío” para evitar 404 -->
+  <link rel="icon" href="data:," />
+
   <!-- Fuentes y estilos -->
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- Firebase SDK compat -->
+  <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
 
+  <!-- Solo inicializamos Firebase; auth/db se crean dentro de script.js -->
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyD8xjRRUWma1JaoHouiCZIi7XghUykc_vw",
-      authDomain: "rastrea-habitos.firebaseapp.com",
-      projectId: "rastrea-habitos",
-      storageBucket: "rastrea-habitos.appspot.com",
+    firebase.initializeApp({
+      apiKey:            "AIzaSyD8xjRRUWma1JaoHouiCZIi7XghUykc_vw",
+      authDomain:        "rastrea-habitos.firebaseapp.com",
+      projectId:         "rastrea-habitos",
+      storageBucket:     "rastrea-habitos.appspot.com",
       messagingSenderId: "569699375413",
-      appId: "1:569699375413:web:94b80bd879a1db77cf147c"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db   = firebase.firestore();
+      appId:             "1:569699375413:web:94b80bd879a1db77cf147c"
+    });
   </script>
 </head>
 
@@ -43,32 +44,31 @@
       <span id="closeModal" class="close">&times;</span>
 
       <div class="tabs">
-        <button id="tabLogin"  class="tab active">Iniciar sesión</button>
-        <button id="tabReg"    class="tab">Crear cuenta</button>
+        <button id="tabLogin" class="tab active">Iniciar sesión</button>
+        <button id="tabReg"   class="tab">Crear cuenta</button>
       </div>
 
       <!-- Login -->
       <div id="loginPane" class="pane">
         <input id="loginEmail" type="email" placeholder="Correo" />
         <input id="loginPass"  type="password" placeholder="Contraseña" />
-        <button id="loginBtn" class="add-habit-btn">Entrar</button>
+        <button id="loginBtn"  class="add-habit-btn">Entrar</button>
       </div>
 
       <!-- Registro -->
       <div id="regPane" class="pane hidden">
         <input id="regEmail" type="email" placeholder="Correo" />
         <input id="regPass"  type="password" placeholder="Contraseña (mín. 6)" />
-        <button id="regBtn" class="add-habit-btn">Registrar</button>
+        <button id="regBtn"  class="add-habit-btn">Registrar</button>
       </div>
 
       <p id="authMsg" class="auth-msg"></p>
     </div>
   </div>
 
-  <!-- Contenedor de la app -->
+  <!-- Contenedor principal -->
   <div class="container hidden" id="appContainer">
     <section class="intro">
-      <!-- acordeones existentes -->
       <button class="accordion">¿Por qué rastrear hábitos? 👇</button>
       <div class="panel">
         <p>Rastrear tus hábitos refuerza la disciplina, mantiene el enfoque y aporta un sentido de logro diario.</p>
@@ -76,14 +76,13 @@
       </div>
       <button class="accordion">Cómo usar la herramienta 👇</button>
       <div class="panel">
-        <p>1. Escribe tu hábito y opcionalmente una descripción.<br>
+        <p>1. Escribe tu hábito y, si quieres, una descripción.<br>
            2. Marca la casilla del día cuando completes tu hábito.<br>
            3. Celebra al llegar al día 21.<br>
            4. Continúa hasta 40 si deseas reforzarlo por completo.</p>
       </div>
     </section>
 
-    <!-- Formulario -->
     <section class="habit-form-container">
       <div class="habit-form">
         <input id="habitInput" type="text" placeholder="Nuevo hábito" />
@@ -92,7 +91,6 @@
       </div>
     </section>
 
-    <!-- Lista -->
     <section id="habitList" class="habit-list"></section>
     <p id="todayLabel" class="today-label"></p>
   </div>
@@ -103,6 +101,7 @@
     <p>Por <a href="https://elikenny.com" target="_blank">elikenny</a></p>
   </footer>
 
+  <!-- Lógica principal -->
   <script src="script.js"></script>
 </body>
 </html>
