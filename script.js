@@ -56,7 +56,8 @@ const mapErr={
   'auth/email-already-in-use':'Ese correo ya existe.',
   'auth/weak-password':'Contraseña mínima 6 caracteres.',
   'auth/invalid-email':'Correo no válido.',
-  'auth/invalid-credential':'Credenciales incorrectas.'
+  'auth/invalid-credential':'Credenciales incorrectas.',
+  'permission-denied':'Sin permisos para guardar datos.'
 };
 
 /* ---------- Logout ---------- */
@@ -91,7 +92,7 @@ auth.onAuthStateChanged(async user=>{
 });
 
 /******************************************************************
-*  Utilidades fecha
+*  Fechas
 ******************************************************************/
 const pad=n=>n<10?'0'+n:n;
 const dateOnly=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
@@ -112,9 +113,11 @@ function initApp(){
 }
 function initAccordions(){
   document.querySelectorAll('.accordion').forEach(b=>{
-    b.onclick=()=>{b.classList.toggle('active');
+    b.onclick=()=>{
+      b.classList.toggle('active');
       const p=b.nextElementSibling;
-      p.style.display=p.style.display==='block'?'none':'block';};
+      p.style.display=p.style.display==='block'?'none':'block';
+    };
   });
 }
 function renderToday(){
@@ -139,10 +142,12 @@ function createCard(name,desc,iso,completed=[]){
   card.appendChild(header);
   if(desc){
     const p=document.createElement('p');p.className='desc';p.textContent=desc;
-    p.ondblclick=()=>editInline(p,'Editar descripción');card.appendChild(p);
+    p.ondblclick=()=>editInline(p,'Editar descripción');
+    card.appendChild(p);
   }
   const grid=document.createElement('div');grid.className='days';
-  const start=fromISO(iso);const passed=Math.floor((dateOnly(new Date())-start)/86400000);
+  const start=fromISO(iso);
+  const passed=Math.floor((dateOnly(new Date())-start)/86400000);
   for(let i=1;i<=40;i++){
     const c=document.createElement('span');
     c.className='day'+(i===21?' milestone':'');c.textContent=i;
@@ -158,12 +163,17 @@ function createCard(name,desc,iso,completed=[]){
   const [y,m,d]=iso.split('-');
   info.textContent=`Comenzado el ${d}/${m}/${y}`;
   info.style.cssText='font-size:.75rem;color:#666;margin-top:8px';
-  card.appendChild(info);list.prepend(card);
+  card.appendChild(info);
+  list.prepend(card);
 }
 function btn(t,c,f){const b=document.createElement('button');b.className=c;b.textContent=t;b.onclick=f;return b;}
-function editInline(el,msg){const v=prompt(msg,el.textContent);if(v&&v.trim()){el.textContent=v.trim();saveHabits();}}
+function editInline(el,msg){
+  const v=prompt(msg,el.textContent);
+  if(v&&v.trim()){el.textContent=v.trim();saveHabits();}
+}
 async function saveHabits(){
-  const arr=[];document.querySelectorAll('.habit').forEach(card=>{
+  const arr=[];
+  document.querySelectorAll('.habit').forEach(card=>{
     const name=card.querySelector('h3').textContent;
     const descE=card.querySelector('.desc');const desc=descE?descE.textContent:'';
     const iso=card.querySelector('p').dataset.iso;
@@ -178,4 +188,3 @@ async function loadHabits(){
   (snap.data().habits||[]).forEach(h=>createCard(
     h.name,h.desc,h.isoStart,Array.isArray(h.completed)?h.completed:[]));
 }
- 
