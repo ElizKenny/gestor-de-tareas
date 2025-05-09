@@ -6,9 +6,9 @@ var auth = window._habitsAuth || (window._habitsAuth = firebase.auth());
 
 /* ---------- Modal ---------- */
 const modal=document.getElementById('modal');
-document.getElementById('openModal').onclick=()=>modal.classList.remove('hidden');
+document.getElementById('openModal').onclick =()=>modal.classList.remove('hidden');
 document.getElementById('closeModal').onclick=()=>modal.classList.add('hidden');
-window.onclick=e=>{if(e.target===modal)modal.classList.add('hidden');};
+window.onclick=e=>{ if(e.target===modal) modal.classList.add('hidden'); };
 
 /* ---------- Tabs ---------- */
 const tabL=document.getElementById('tabLogin');
@@ -17,7 +17,7 @@ const paneL=document.getElementById('loginPane');
 const paneR=document.getElementById('regPane');
 const authMsg=document.getElementById('authMsg');
 function actTab(login=true){
-  tabL.classList.toggle('active',login);
+  tabL.classList.toggle('active', login);
   tabR.classList.toggle('active',!login);
   paneL.classList.toggle('hidden',!login);
   paneR.classList.toggle('hidden', login);
@@ -79,7 +79,7 @@ auth.onAuthStateChanged(async user=>{
       const snap=await db.collection('users').doc(uid).get();
       name=snap.exists&&snap.data().profile?snap.data().profile.name:'';
     }
-    document.getElementById('greeting').textContent=name?`Hola, ${name}`:'Hola';
+    document.getElementById('greeting').textContent = name?`Hola, ${name}`:'Hola';
     modal.classList.add('hidden');
     document.querySelector('.hero').classList.add('hidden');
     document.getElementById('appContainer').classList.remove('hidden');
@@ -103,88 +103,129 @@ const fromISO=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)
 /******************************************************************
 *  Gestor hábitos
 ******************************************************************/
-let habitInput,descInput,list;
+let habitInput,descInput,list,addHabitButton;
 function initApp(){
-  habitInput=document.getElementById('habitInput');
-  descInput =document.getElementById('descInput');
-  list      =document.getElementById('habitList');
-  initAccordions();renderToday();loadHabits();
-  document.getElementById('addHabitButton').onclick=addHabit;
+  habitInput      = document.getElementById('habitInput');
+  descInput       = document.getElementById('descInput');
+  list            = document.getElementById('habitList');
+  addHabitButton  = document.getElementById('addHabitButton');
+
+  initAccordions(); renderToday(); loadHabits();
+  addHabitButton.onclick = addHabit;
 }
 function initAccordions(){
   document.querySelectorAll('.accordion').forEach(b=>{
     b.onclick=()=>{
       b.classList.toggle('active');
       const p=b.nextElementSibling;
-      p.style.display=p.style.display==='block'?'none':'block';
+      p.style.display = p.style.display==='block' ? 'none' : 'block';
     };
   });
 }
 function renderToday(){
   const d=dateOnly(new Date());
-  document.getElementById('todayLabel').textContent=
+  document.getElementById('todayLabel').textContent =
     `Hoy es ${d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`;
 }
-function addHabit(){
-  const n=habitInput.value.trim();
+
+/* --- Añadir hábito (ahora async para esperar saveHabits) --- */
+async function addHabit(){
+  const n = habitInput.value.trim();
   if(!n){alert('Escribe un hábito');return;}
-  createCard(n,descInput.value.trim(),todayISO(),[]);
-  habitInput.value='';descInput.value='';saveHabits();
+
+  addHabitButton.disabled = true;
+  createCard(n, descInput.value.trim(), todayISO(), []);
+  habitInput.value=''; descInput.value='';
+
+  try{
+    await saveHabits();            // asegura persistencia antes de refrescar
+  }catch(e){
+    alert('⚠️ No se pudo guardar. Revisa tu conexión.');
+    console.error(e);
+  }
+  addHabitButton.disabled = false;
 }
+
+/* --- Construir tarjeta --- */
 function createCard(name,desc,iso,completed=[]){
   const card=document.createElement('div');card.className='habit';
+
+  /* Título */
   const h3=document.createElement('h3');h3.textContent=name;
   h3.ondblclick=()=>editInline(h3,'Nuevo nombre');
+
+  /* Descripción */
+  let descP=null;
+  if(desc){
+    descP=document.createElement('p');
+    descP.className='desc';
+    descP.textContent=desc;
+    descP.ondblclick=()=>editInline(descP,'Nueva descripción');
+  }
+
+  /* Header con botones */
   const header=document.createElement('header');
   header.appendChild(h3);
-  header.appendChild(btn('Editar','edit-btn',()=>editInline(h3,'Nuevo nombre')));
+  header.appendChild(btn('Editar título','edit-btn',()=>editInline(h3,'Nuevo nombre')));
+  if(descP){
+    header.appendChild(btn('Editar desc.','edit-btn',()=>editInline(descP,'Nueva descripción')));
+  }
   header.appendChild(btn('Eliminar','delete-btn',()=>{card.remove();saveHabits();}));
   card.appendChild(header);
-  if(desc){
-    const p=document.createElement('p');p.className='desc';p.textContent=desc;
-    p.ondblclick=()=>editInline(p,'Editar descripción');
-    card.appendChild(p);
-  }
+
+  if(descP) card.appendChild(descP);
+
+  /* Grid 40 días */
   const grid=document.createElement('div');grid.className='days';
   const start=fromISO(iso);
   const passed=Math.floor((dateOnly(new Date())-start)/86400000);
   for(let i=1;i<=40;i++){
     const c=document.createElement('span');
     c.className='day'+(i===21?' milestone':'');c.textContent=i;
-    if(i-1>passed)c.classList.add('disabled');
-    if(completed.includes(i))c.classList.add('completed');
+    if(i-1>passed)       c.classList.add('disabled');
+    if(completed.includes(i)) c.classList.add('completed');
     c.onclick=()=>{if(c.classList.contains('disabled'))return;
                    c.classList.toggle('completed');saveHabits();};
     grid.appendChild(c);
   }
   card.appendChild(grid);
+
+  /* Fecha inicio */
   const info=document.createElement('p');
   info.dataset.iso=iso;
   const [y,m,d]=iso.split('-');
   info.textContent=`Comenzado el ${d}/${m}/${y}`;
   info.style.cssText='font-size:.75rem;color:#666;margin-top:8px';
   card.appendChild(info);
+
   list.prepend(card);
 }
+
+/* --- Utilidades --- */
 function btn(t,c,f){const b=document.createElement('button');b.className=c;b.textContent=t;b.onclick=f;return b;}
 function editInline(el,msg){
   const v=prompt(msg,el.textContent);
   if(v&&v.trim()){el.textContent=v.trim();saveHabits();}
 }
+
+/******************************************************************
+*  Persistencia Firestore
+******************************************************************/
 async function saveHabits(){
   const arr=[];
   document.querySelectorAll('.habit').forEach(card=>{
     const name=card.querySelector('h3').textContent;
     const descE=card.querySelector('.desc');const desc=descE?descE.textContent:'';
-    const iso=card.querySelector('p').dataset.iso;
+    const iso =card.querySelector('p').dataset.iso;
     const comp=[];card.querySelectorAll('.day.completed').forEach(c=>comp.push(+c.textContent));
     arr.push({name,desc,isoStart:iso,completed:comp});
   });
   await db.collection('users').doc(uid).set({profile:{},habits:arr},{merge:true});
 }
+
 async function loadHabits(){
   const snap=await db.collection('users').doc(uid).get();
-  if(!snap.exists)return;
+  if(!snap.exists) return;
   (snap.data().habits||[]).forEach(h=>createCard(
     h.name,h.desc,h.isoStart,Array.isArray(h.completed)?h.completed:[]));
 }

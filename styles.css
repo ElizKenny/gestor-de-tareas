@@ -110,3 +110,9 @@ h1,h2,h3{margin:0}
   background:none;
   border:none;
 }
+.edit-btn{
+  background:#3498db;
+}
+.edit-btn:hover{
+  background:#2980b9;
+}
