@@ -272,13 +272,27 @@ async function saveHabits() {
     arr.push({ name, desc, isoStart: iso, completed: comp });
   });
 
+  try {
+    // 1) Intentamos guardar en Firestore
+    await db.collection('users').doc(uid)
+            .set({ profile: {}, habits: arr }, { merge: true });
+    // 2) Si salió bien, borramos el backup local
+    localStorage.removeItem(LSKEY);
+  } catch(e) {
+    console.error('🔥 Firestore saving failed:', e);
+    alert(`⚠️ No se pudo guardar en la nube (code: ${e.code}).
+  Revisa la consola para ver e.message.`);
+    throw e;
+  }
+}
+
   // Try Firestore
   await db.collection('users').doc(uid)
           .set({ profile: {}, habits: arr }, { merge: true });
 
   // On success, clear local backup
   localStorage.removeItem(LSKEY);
-}
+
 
 /******************************************************************
 *  Load from Firestore or localStorage fallback
