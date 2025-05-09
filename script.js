@@ -328,4 +328,3 @@ async function loadHabits() {
     }
   }
 }
-
