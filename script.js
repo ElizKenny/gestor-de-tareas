@@ -137,8 +137,11 @@ async function addHabit(){
   habitInput.value='';descInput.value='';
 
   try{ await saveHabits(); }
-  catch(e){alert('⚠️ No se pudo guardar en la nube. Se guardará localmente.');}
-  addHabitButton.disabled=false;
+  catch(e){
+    console.error('Firestore error:', e.code, e.message);
+    alert(`⚠️ No se pudo guardar en la nube (${e.code}). 
+  Se guardó una copia local por si acaso.`);
+  }  addHabitButton.disabled=false;
 }
 
 /* ---------- Crear tarjeta ---------- */
