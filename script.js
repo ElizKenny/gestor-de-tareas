@@ -262,6 +262,7 @@ function editInline(el, msg) {
 *  Persist to Firestore (remove local backup on success)
 ******************************************************************/
 async function saveHabits() {
+  // 1) Construye el array de hábitos como siempre
   const arr = [];
   document.querySelectorAll('.habit').forEach(card => {
     const name  = card.querySelector('h3').textContent;
@@ -273,17 +274,28 @@ async function saveHabits() {
     arr.push({ name, desc, isoStart: iso, completed: comp });
   });
 
+  // 2) Muestra en consola el array que vamos a enviar
+  console.log('🚀 Intentando guardar este array en Firestore:', arr);
+
   try {
+    // 3) Intento de guardado en Firestore
     await db.collection('users').doc(uid)
             .set({ profile: {}, habits: arr }, { merge: true });
+    // 4) Si todo sale bien, borramos el backup local
     localStorage.removeItem(LSKEY);
   } catch (e) {
-    console.error('🔥 Firestore saving failed:', e);
-    alert(`⚠️ No se pudo guardar en la nube (code: ${e.code}).\n` +
-          `Revisa la consola para más detalles.`);
+    // 5) Imprime TODO el error para que veas el mensaje completo
+    console.error('🔥 Firestore saving failed:', {
+      code:    e.code,
+      message: e.message,
+      stack:   e.stack
+    });
+    alert(`⚠️ No se pudo guardar en la nube (code: ${e.code}).  
+Mira la consola (F12 → Console) y copia aquí el valor de "message".`);
     throw e;
   }
 }
+
 
 /******************************************************************
 *  Load from Firestore or localStorage fallback
