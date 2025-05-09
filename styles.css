@@ -110,9 +110,6 @@ h1,h2,h3{margin:0}
   background:none;
   border:none;
 }
-.edit-btn{
-  background:#3498db;
-}
-.edit-btn:hover{
-  background:#2980b9;
-}
+
+.edit-btn        { background:#7d7d7d; }   /* gris medio */
+.edit-btn:hover  { background:#606060; }   /* gris más oscuro al pasar */

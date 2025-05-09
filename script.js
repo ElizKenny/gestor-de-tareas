@@ -1,8 +1,9 @@
 /******************************************************************
 *  Firebase compat
 ******************************************************************/
-var db   = window._habitsDB   || (window._habitsDB   = firebase.firestore());
-var auth = window._habitsAuth || (window._habitsAuth = firebase.auth());
+const db   = window._habitsDB   || (window._habitsDB   = firebase.firestore());
+const auth = window._habitsAuth || (window._habitsAuth = firebase.auth());
+const LSKEY = 'habit40_backup';
 
 /* ---------- Modal ---------- */
 const modal=document.getElementById('modal');
@@ -64,7 +65,7 @@ const mapErr={
 const logoutBtn=document.getElementById('logoutBtn');
 logoutBtn.onclick=async()=>{
   logoutBtn.style.opacity=.5;
-  await saveHabits();
+  await saveHabits();          // intenta enviar a Firestore
   await auth.signOut();
   logoutBtn.style.opacity=1;
 };
@@ -74,11 +75,7 @@ let uid;
 auth.onAuthStateChanged(async user=>{
   if(user){
     uid=user.uid;
-    let name=user.displayName;
-    if(!name){
-      const snap=await db.collection('users').doc(uid).get();
-      name=snap.exists&&snap.data().profile?snap.data().profile.name:'';
-    }
+    const name=user.displayName||await getNameFromDoc(uid);
     document.getElementById('greeting').textContent = name?`Hola, ${name}`:'Hola';
     modal.classList.add('hidden');
     document.querySelector('.hero').classList.add('hidden');
@@ -90,6 +87,10 @@ auth.onAuthStateChanged(async user=>{
     document.getElementById('habitList').innerHTML='';
   }
 });
+async function getNameFromDoc(uid){
+  const snap=await db.collection('users').doc(uid).get();
+  return snap.exists&&snap.data().profile?snap.data().profile.name:'';
+}
 
 /******************************************************************
 *  Fechas
@@ -105,92 +106,75 @@ const fromISO=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)
 ******************************************************************/
 let habitInput,descInput,list,addHabitButton;
 function initApp(){
-  habitInput      = document.getElementById('habitInput');
-  descInput       = document.getElementById('descInput');
-  list            = document.getElementById('habitList');
-  addHabitButton  = document.getElementById('addHabitButton');
+  habitInput=document.getElementById('habitInput');
+  descInput =document.getElementById('descInput');
+  list      =document.getElementById('habitList');
+  addHabitButton=document.getElementById('addHabitButton');
 
   initAccordions(); renderToday(); loadHabits();
   addHabitButton.onclick = addHabit;
 }
 function initAccordions(){
   document.querySelectorAll('.accordion').forEach(b=>{
-    b.onclick=()=>{
-      b.classList.toggle('active');
+    b.onclick=()=>{b.classList.toggle('active');
       const p=b.nextElementSibling;
-      p.style.display = p.style.display==='block' ? 'none' : 'block';
-    };
+      p.style.display=p.style.display==='block'?'none':'block';};
   });
 }
 function renderToday(){
   const d=dateOnly(new Date());
-  document.getElementById('todayLabel').textContent =
+  document.getElementById('todayLabel').textContent=
     `Hoy es ${d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`;
 }
 
-/* --- Añadir hábito (ahora async para esperar saveHabits) --- */
+/* ---------- Añadir hábito (await save) ---------- */
 async function addHabit(){
-  const n = habitInput.value.trim();
+  const n=habitInput.value.trim();
   if(!n){alert('Escribe un hábito');return;}
 
-  addHabitButton.disabled = true;
-  createCard(n, descInput.value.trim(), todayISO(), []);
-  habitInput.value=''; descInput.value='';
+  addHabitButton.disabled=true;
+  createCard(n,descInput.value.trim(),todayISO(),[]);
+  habitInput.value='';descInput.value='';
 
-  try{
-    await saveHabits();            // asegura persistencia antes de refrescar
-  }catch(e){
-    alert('⚠️ No se pudo guardar. Revisa tu conexión.');
-    console.error(e);
-  }
-  addHabitButton.disabled = false;
+  try{ await saveHabits(); }
+  catch(e){alert('⚠️ No se pudo guardar en la nube. Se guardará localmente.');}
+  addHabitButton.disabled=false;
 }
 
-/* --- Construir tarjeta --- */
+/* ---------- Crear tarjeta ---------- */
 function createCard(name,desc,iso,completed=[]){
   const card=document.createElement('div');card.className='habit';
 
-  /* Título */
   const h3=document.createElement('h3');h3.textContent=name;
   h3.ondblclick=()=>editInline(h3,'Nuevo nombre');
 
-  /* Descripción */
   let descP=null;
   if(desc){
-    descP=document.createElement('p');
-    descP.className='desc';
-    descP.textContent=desc;
+    descP=document.createElement('p');descP.className='desc';descP.textContent=desc;
     descP.ondblclick=()=>editInline(descP,'Nueva descripción');
   }
 
-  /* Header con botones */
   const header=document.createElement('header');
-  header.appendChild(h3);
-  header.appendChild(btn('Editar título','edit-btn',()=>editInline(h3,'Nuevo nombre')));
-  if(descP){
-    header.appendChild(btn('Editar desc.','edit-btn',()=>editInline(descP,'Nueva descripción')));
-  }
-  header.appendChild(btn('Eliminar','delete-btn',()=>{card.remove();saveHabits();}));
+  header.append(h3,
+    btn('Editar título','edit-btn',()=>editInline(h3,'Nuevo nombre')),
+    btn('Editar desc.','edit-btn',()=>editInline(descP||createDesc(card),'Nueva descripción')),
+    btn('Eliminar','delete-btn',()=>{card.remove();saveHabits();}));
   card.appendChild(header);
-
   if(descP) card.appendChild(descP);
 
-  /* Grid 40 días */
   const grid=document.createElement('div');grid.className='days';
-  const start=fromISO(iso);
-  const passed=Math.floor((dateOnly(new Date())-start)/86400000);
+  const start=fromISO(iso),passed=Math.floor((dateOnly(new Date())-start)/86400000);
   for(let i=1;i<=40;i++){
     const c=document.createElement('span');
     c.className='day'+(i===21?' milestone':'');c.textContent=i;
-    if(i-1>passed)       c.classList.add('disabled');
-    if(completed.includes(i)) c.classList.add('completed');
+    if(i-1>passed)c.classList.add('disabled');
+    if(completed.includes(i))c.classList.add('completed');
     c.onclick=()=>{if(c.classList.contains('disabled'))return;
                    c.classList.toggle('completed');saveHabits();};
     grid.appendChild(c);
   }
   card.appendChild(grid);
 
-  /* Fecha inicio */
   const info=document.createElement('p');
   info.dataset.iso=iso;
   const [y,m,d]=iso.split('-');
@@ -200,16 +184,21 @@ function createCard(name,desc,iso,completed=[]){
 
   list.prepend(card);
 }
-
-/* --- Utilidades --- */
+function createDesc(card){
+  const p=document.createElement('p');
+  p.className='desc';p.textContent='';
+  card.insertBefore(p,card.querySelector('.days'));
+  return p;
+}
 function btn(t,c,f){const b=document.createElement('button');b.className=c;b.textContent=t;b.onclick=f;return b;}
 function editInline(el,msg){
+  if(!el) return;
   const v=prompt(msg,el.textContent);
   if(v&&v.trim()){el.textContent=v.trim();saveHabits();}
 }
 
 /******************************************************************
-*  Persistencia Firestore
+*  Guardado híbrido (Firestore + localStorage)
 ******************************************************************/
 async function saveHabits(){
   const arr=[];
@@ -220,12 +209,29 @@ async function saveHabits(){
     const comp=[];card.querySelectorAll('.day.completed').forEach(c=>comp.push(+c.textContent));
     arr.push({name,desc,isoStart:iso,completed:comp});
   });
+
+  /* 1) localStorage backup siempre */
+  localStorage.setItem(LSKEY,JSON.stringify(arr));
+
+  /* 2) intento nube */
   await db.collection('users').doc(uid).set({profile:{},habits:arr},{merge:true});
 }
 
 async function loadHabits(){
-  const snap=await db.collection('users').doc(uid).get();
-  if(!snap.exists) return;
-  (snap.data().habits||[]).forEach(h=>createCard(
-    h.name,h.desc,h.isoStart,Array.isArray(h.completed)?h.completed:[]));
+  /* Intento nube */
+  try{
+    const snap=await db.collection('users').doc(uid).get();
+    if(snap.exists && snap.data().habits){
+      snap.data().habits.forEach(h=>createCard(h.name,h.desc,h.isoStart,h.completed||[]));
+      return;
+    }
+  }catch(e){console.warn('Firestore no disponible, uso backup local');}
+
+  /* Fallback localStorage */
+  const raw=localStorage.getItem(LSKEY);
+  if(raw){
+    try{ JSON.parse(raw).forEach(h=>createCard(h.name,h.desc,h.isoStart,h.completed||[])); }
+    catch(e){ console.error('Backup corrupto'); }
+  }
 }
+  
