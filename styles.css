@@ -111,5 +111,92 @@ h1,h2,h3{margin:0}
   border:none;
 }
 
-.edit-btn       { background:#a0a0a0; }
-.edit-btn:hover { background:#808080; }
+/* ─ util ─ */
+.hidden{display:none !important}
+:root {
+  /* Colores y variables */
+  --bg: #f4f4f4; --text: #333;
+  --card: #fff;  --accent: #f1c40f;
+  --accent-dark: #f39c12; --dark-bg: #2c3e50;
+  --dark-text: #eee;
+}
+body {
+  margin:0; font-family:Roboto,sans-serif;
+  background: var(--bg); color: var(--text);
+  display:flex; flex-direction:column; align-items:center;
+  min-height:100vh; padding-bottom:100px;
+}
+/* Dark mode */
+body.dark {
+  background:#222; color: var(--dark-text);
+}
+.container {
+  background: var(--card);
+  width:100%; max-width:960px;
+  margin:50px 0; padding:40px 32px 60px;
+  border-radius:10px; box-shadow:0 8px 28px rgba(0,0,0,.08);
+  transition: background .3s, color .3s;
+}
+body.dark .container {
+  background:#333; color:#ddd;
+}
+
+/* Hero */
+.hero {
+  text-align:center; padding:70px 20px 30px;
+  width:100%; background: var(--bg);
+}
+.hero-title {
+  font-family:Pacifico,cursive; font-size:3.5rem; color:#24344d;
+}
+.hero-sub{font-size:1.1rem;margin:10px 0;}
+.add-habit-btn {
+  background: var(--accent); color:#fff;
+  border:none; border-radius:6px;
+  padding:11px 26px; font-weight:700;
+  cursor:pointer; margin:0 5px;
+}
+.add-habit-btn:hover{background:var(--accent-dark);}
+
+/* FullCalendar */
+#calendar { max-width:900px; margin:20px auto; }
+
+/* Stats */
+.stats { max-width:900px; margin:30px auto; }
+
+/* Formulario */
+.habit-form {
+  display:flex; flex-wrap:wrap;
+  gap:10px; justify-content:center;
+  margin:34px 0;
+}
+.habit-form input[type="text"] {
+  flex:1 1 200px; padding:11px;
+  border:1px solid #d0d0d0; border-radius:6px;
+}
+.habit-form input[type="color"] { width:50px; padding:0; }
+
+/* Cards reducidas en ancho si quieres grid */
+.habit-list { display:flex; flex-wrap:wrap; gap:20px; }
+.habit { width:48%; background:#e9ecef; padding:20px; border-radius:8px; }
+body.dark .habit { background:#444; }
+
+/* Botones de edición compactos */
+.edit-btn::before { content:'✎'; margin-right:0; }
+.delete-btn::before{ content:'🗑'; margin-right:0; }
+.edit-btn, .delete-btn {
+  padding:4px 8px; font-size:.8rem; margin-left:4px;
+}
+
+/* Footer fijo */
+.footer {
+  position:fixed; bottom:0; left:0; width:100%;
+  background: var(--dark-bg); color:#fff;
+  text-align:center; padding:18px 0;
+}
+
+/* Responsive */
+@media(max-width:600px){
+  .container { margin:20px 10px; padding:20px;}
+  .habit { width:100%; }
+}

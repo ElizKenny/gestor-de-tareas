@@ -163,8 +163,7 @@ async function addHabit() {
   try {
     await saveHabits();
   } catch (e) {
-    alert(`⚠️ No se pudo guardar en la nube (code: ${e.code}).` +
-          `\nSe mantiene localmente.`);
+    alert(`⚠️ No se pudo guardar en la nube (code: ${e.code}).\nSe mantiene localmente.`);
   }
 
   addHabitButton.disabled = false;
@@ -175,12 +174,10 @@ function createCard(name, desc, iso, completed = []) {
   const card = document.createElement('div');
   card.className = 'habit';
 
-  // Title
   const h3 = document.createElement('h3');
   h3.textContent = name;
   h3.ondblclick = () => editInline(h3, 'Nuevo nombre');
 
-  // Description
   let descP = null;
   if (desc) {
     descP = document.createElement('p');
@@ -189,20 +186,15 @@ function createCard(name, desc, iso, completed = []) {
     descP.ondblclick = () => editInline(descP, 'Nueva descripción');
   }
 
-  // Header
   const header = document.createElement('header');
   header.appendChild(h3);
-  header.appendChild(btn('Editar título', 'edit-btn',
-    () => editInline(h3, 'Nuevo nombre')));
-  header.appendChild(btn('Editar desc.', 'edit-btn',
-    () => editInline(descP || createDesc(card), 'Nueva descripción')));
-  header.appendChild(btn('Eliminar', 'delete-btn',
-    () => { card.remove(); saveHabits(); }));
+  header.appendChild(btn('Editar título', 'edit-btn', () => editInline(h3, 'Nuevo nombre')));
+  header.appendChild(btn('📝', 'edit-btn', () => editInline(descP || createDesc(card), 'Nueva descripción')));
+  header.appendChild(btn('🗑', 'delete-btn', () => { card.remove(); saveHabits(); }));
   card.appendChild(header);
 
   if (descP) card.appendChild(descP);
 
-  // Days grid
   const grid = document.createElement('div');
   grid.className = 'days';
   const start  = fromISO(iso);
@@ -222,7 +214,6 @@ function createCard(name, desc, iso, completed = []) {
   }
   card.appendChild(grid);
 
-  // Start date
   const info = document.createElement('p');
   info.dataset.iso = iso;
   const [y,m,d] = iso.split('-');
@@ -262,13 +253,11 @@ function editInline(el, msg) {
 *  Persist to Firestore (remove local backup on success)
 ******************************************************************/
 async function saveHabits() {
-  // 1) Construye el array de hábitos
   const arr = [];
   document.querySelectorAll('.habit').forEach(card => {
     const name  = card.querySelector('h3').textContent;
     const descE = card.querySelector('p.desc');
     const desc  = descE ? descE.textContent : '';
-    // Aquí sólo buscamos el <p> que lleva data-iso
     const isoP  = card.querySelector('p[data-iso]');
     const iso   = isoP ? isoP.dataset.iso : '';
     const comp  = [];
@@ -276,28 +265,10 @@ async function saveHabits() {
     arr.push({ name, desc, isoStart: iso, completed: comp });
   });
 
-  // 2) Muestra en consola el array que vamos a enviar
-  console.log('🚀 Intentando guardar este array en Firestore:', arr);
-
-  try {
-    // 3) Intento de guardado en Firestore
-    await db.collection('users').doc(uid)
-            .set({ profile: {}, habits: arr }, { merge: true });
-    // 4) Si todo sale bien, borramos el backup local
-    localStorage.removeItem(LSKEY);
-  } catch (e) {
-    console.error('🔥 Firestore saving failed:', {
-      code:    e.code,
-      message: e.message,
-      stack:   e.stack
-    });
-    alert(`⚠️ No se pudo guardar en la nube (code: ${e.code}).  
-Mira la consola (F12 → Console) y copia aquí el “message” completo.`);
-    throw e;
-  }
+  console.log('🚀 Guardando array en Firestore:', arr);
+  await db.collection('users').doc(uid).set({ profile: {}, habits: arr }, { merge: true });
+  localStorage.removeItem(LSKEY);
 }
-
-
 
 /******************************************************************
 *  Load from Firestore or localStorage fallback
@@ -313,7 +284,7 @@ async function loadHabits() {
       return;
     }
   } catch (e) {
-    console.warn('Firestore error, cargar local fallback →', e);
+    console.warn('Firestore error, fallback a localStorage', e);
   }
 
   const raw = localStorage.getItem(LSKEY);
@@ -327,4 +298,10 @@ async function loadHabits() {
       console.error('LocalStorage corrupto:', e);
     }
   }
+}
+
+// Registrar Service Worker para PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js')
+    .catch(err => console.error('Service Worker registration failed:', err));
 }

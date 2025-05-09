@@ -2,85 +2,63 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Rastreo de Hábitos</title>
-
-  <!-- Favicon vacío para evitar 404 -->
   <link rel="icon" href="data:," />
-
-  <!-- Fuentes Google + hoja de estilos -->
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
-
-  <!-- Firebase compat -->
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.json" />
+  <!-- FullCalendar CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Firebase compat + FCM -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-messaging-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
-
   <script>
     firebase.initializeApp({
-      apiKey:            "AIzaSyD8xjRRUWma1JaoHouiCZIi7XghUykc_vw",
-      authDomain:        "rastrea-habitos.firebaseapp.com",
-      projectId:         "rastrea-habitos",
-      storageBucket:     "rastrea-habitos.appspot.com",
+      apiKey: "AIzaSyD8xjRR...",
+      authDomain: "rastrea-habitos.firebaseapp.com",
+      projectId: "rastrea-habitos",
+      storageBucket: "rastrea-habitos.appspot.com",
       messagingSenderId: "569699375413",
-      appId:             "1:569699375413:web:94b80bd879a1db77cf147c"
+      appId: "1:569699375413:web:94b80bd879a1db77cf147c"
     });
+    // Init FCM
+    const messaging = firebase.messaging();
+    messaging.requestPermission()
+      .then(() => messaging.getToken())
+      .then(token => console.log('FCM token:', token))
+      .catch(() => console.warn('No permission for notifications'));
   </script>
   <!-- Google Tag Manager -->
-  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-PXMTK3B6');</script>
-  <!-- End Google Tag Manager -->
-</head>
+  <script>(function(w,d,s,l,i){/*...*/})(window,document,'script','dataLayer','GTM-PXMTK3B6');</script>
+  <!-- Fuentes + estilos -->
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.json" />
 
+</head>
 <body>
-  <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PXMTK3B6"
-  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-  <!-- End Google Tag Manager (noscript) -->
-  <!-- Hero de bienvenida -->
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+  <!-- Hero -->
   <header class="hero">
     <h1 class="hero-title">Rastrea tus Hábitos</h1>
     <p class="hero-sub">Convierte tus intenciones en acciones diarias y celebra cada logro.</p>
+    <button id="themeToggle" aria-label="Alternar modo oscuro">🌓</button>
     <button id="openModal" class="add-habit-btn">Empezar</button>
+    <button id="exportCSV" class="add-habit-btn">Exportar CSV</button>
   </header>
 
-  <!-- Modal login/registro -->
-  <div id="modal" class="modal hidden">
-    <div class="modal-content">
-      <span id="closeModal" class="close">&times;</span>
+  <!-- Modal Auth -->
+  <div id="modal" class="modal hidden">…</div>
 
-      <div class="tabs">
-        <button id="tabLogin" class="tab active">Iniciar sesión</button>
-        <button id="tabReg"   class="tab">Crear cuenta</button>
-      </div>
-
-      <!-- Pane login -->
-      <div id="loginPane" class="pane">
-        <input id="loginEmail" type="email" placeholder="Correo" />
-        <input id="loginPass"  type="password" placeholder="Contraseña" />
-        <button id="loginBtn"  class="add-habit-btn full">Entrar</button>
-      </div>
-
-      <!-- Pane registro -->
-      <div id="regPane" class="pane hidden">
-        <input id="regName"  type="text"  placeholder="Tu nombre" />
-        <input id="regEmail" type="email" placeholder="Correo" />
-        <input id="regPass"  type="password" placeholder="Contraseña (mín. 6)" />
-        <button id="regBtn"  class="add-habit-btn full">Registrar</button>
-      </div>
-
-      <p id="authMsg" class="auth-msg"></p>
-    </div>
-  </div>
-
-  <!-- CONTENEDOR PRINCIPAL -->
+  <!-- App Container -->
   <div class="container hidden" id="appContainer">
-
-    <!-- Cabecera app -->
     <header class="app-header">
       <h2 class="app-title">Rastrea tus Hábitos</h2>
       <div class="user-bar">
@@ -89,36 +67,24 @@
       </div>
     </header>
 
-    <!-- LISTA de hábitos (quedará arriba) -->
-    <section id="habitList" class="habit-list"></section>
+    <!-- Calendario FullCalendar -->
+    <div id="calendar"></div>
 
-    <!-- ACORDEONES + texto motivacional -->
-    <section class="intro">
-      <p class="motiv">✨ Vuelve cada día y marca tu progreso ✨</p>
-
-      <button class="accordion">¿Por qué rastrear hábitos? 👇</button>
-      <div class="panel">
-        <p>Rastrear tus hábitos refuerza la disciplina, mantiene tu enfoque y aporta un sentido de logro diario.</p>
-        <p>Este espacio —como una pizarra en blanco— te permite ver y registrar el progreso: visualizar avances, recordar tu propósito y ajustar lo necesario para acercarte a tu mejor versión.</p>
-        <p>La casilla <strong>21</strong> se destaca porque, después de tres semanas seguidas, mucha gente siente su primer gran hito de constancia; no por nada abundan los famosos “retos de 21 días” que ves por todos lados, aunque el tiempo real para consolidar un hábito varía de persona a persona.</p>
-      </div>
-
-      <button class="accordion">Cómo utilizar esta herramienta 👇</button>
-      <div class="panel">
-        <p>1.&nbsp;Escribe el hábito y, si quieres, una descripción.<br>
-           2.&nbsp;Marca la casilla del día cuando completes el hábito.<br>
-           3.&nbsp;Celebra al llegar al día 21 🎉.<br>
-           4.&nbsp;Continúa hasta los <strong>40 días</strong> para reforzarlo.<br>
-           5.&nbsp;¡Puedes crear y rastrear tantos hábitos como quieras!</p>
-        <p>La disciplina diaria genera progreso constante. ¿Sugerencias? ¡Escríbeme! 😊</p>
-      </div>
+    <!-- Estadísticas -->
+    <section class="stats">
+      <canvas id="statsChart" aria-label="Gráfico de progreso de hábitos"></canvas>
     </section>
 
-    <!-- Formulario -->
+    <!-- Motivacional & acordeones -->
+    <section class="intro">…</section>
+
+    <!-- Formulario con categoría + color -->
     <section class="habit-form-container">
       <div class="habit-form">
-        <input id="habitInput" type="text" placeholder="Nuevo hábito" />
-        <input id="descInput"  type="text" placeholder="Descripción / Propósito (opcional)" />
+        <input id="habitInput" type="text" placeholder="Nuevo hábito" aria-label="Nombre del hábito"/>
+        <input id="descInput"  type="text" placeholder="Descripción (opcional)" aria-label="Descripción"/>
+        <input id="catInput"   type="text" placeholder="Categoría (opcional)" aria-label="Categoría"/>
+        <input id="colorInput" type="color" value="#2ecc71" aria-label="Color de categoría"/>
         <button id="addHabitButton" class="add-habit-btn">Añadir hábito</button>
       </div>
     </section>
@@ -126,12 +92,21 @@
     <p id="todayLabel" class="today-label"></p>
   </div>
 
-  <!-- Footer -->
+  <!-- Footer fijo -->
   <footer class="footer">
     <p>Creado con 🤍</p>
     <p>Por <a href="https://elikenny.com" target="_blank">elikenny</a></p>
   </footer>
 
+  <!-- FullCalendar JS + tu script -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker registrado'))
+        .catch(console.error);
+    }
+  </script>  
   <script src="script.js"></script>
 </body>
 </html>
