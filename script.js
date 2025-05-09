@@ -87,7 +87,7 @@ auth.onAuthStateChanged(async user => {
     let name = user.displayName;
     if (!name) {
       const snap = await db.collection('users').doc(uid).get();
-      name = snap.exists && snap.data().profile
+      name = (snap.exists && snap.data().profile)
              ? snap.data().profile.name
              : '';
     }
@@ -163,7 +163,8 @@ async function addHabit() {
   try {
     await saveHabits();
   } catch (e) {
-    alert(`⚠️ Error guardando en nube (${e.code}). El hábito se mantiene localmente.`);
+    alert(`⚠️ No se pudo guardar en la nube (code: ${e.code}).` +
+          `\nSe mantiene localmente.`);
   }
 
   addHabitButton.disabled = false;
@@ -273,32 +274,21 @@ async function saveHabits() {
   });
 
   try {
-    // 1) Intentamos guardar en Firestore
     await db.collection('users').doc(uid)
             .set({ profile: {}, habits: arr }, { merge: true });
-    // 2) Si salió bien, borramos el backup local
     localStorage.removeItem(LSKEY);
-  } catch(e) {
+  } catch (e) {
     console.error('🔥 Firestore saving failed:', e);
-    alert(`⚠️ No se pudo guardar en la nube (code: ${e.code}).
-  Revisa la consola para ver e.message.`);
+    alert(`⚠️ No se pudo guardar en la nube (code: ${e.code}).\n` +
+          `Revisa la consola para más detalles.`);
     throw e;
   }
 }
-
-  // Try Firestore
-  await db.collection('users').doc(uid)
-          .set({ profile: {}, habits: arr }, { merge: true });
-
-  // On success, clear local backup
-  localStorage.removeItem(LSKEY);
-
 
 /******************************************************************
 *  Load from Firestore or localStorage fallback
 ******************************************************************/
 async function loadHabits() {
-  // Firestore first
   try {
     const snap = await db.collection('users').doc(uid).get();
     if (snap.exists && Array.isArray(snap.data().habits)) {
@@ -309,10 +299,9 @@ async function loadHabits() {
       return;
     }
   } catch (e) {
-    console.warn('Firestore error, loading local backup', e);
+    console.warn('Firestore error, cargar local fallback →', e);
   }
 
-  // Fallback to localStorage
   const raw = localStorage.getItem(LSKEY);
   if (raw) {
     try {
@@ -321,7 +310,7 @@ async function loadHabits() {
                    Array.isArray(h.completed) ? h.completed : [])
       );
     } catch (e) {
-      console.error('LocalStorage backup corrupt', e);
+      console.error('LocalStorage corrupto:', e);
     }
   }
 }
