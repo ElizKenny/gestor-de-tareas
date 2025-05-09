@@ -64,10 +64,10 @@ async function doAuth(mode) {
 }
 const mapErr = {
   'auth/email-already-in-use': 'Ese correo ya existe.',
-  'auth/weak-password': 'Contraseña mínima 6 caracteres.',
-  'auth/invalid-email': 'Correo no válido.',
-  'auth/invalid-credential': 'Credenciales incorrectas.',
-  'permission-denied': 'Sin permisos para guardar datos.'
+  'auth/weak-password':         'Contraseña mínima 6 caracteres.',
+  'auth/invalid-email':         'Correo no válido.',
+  'auth/invalid-credential':    'Credenciales incorrectas.',
+  'permission-denied':          'Sin permisos para guardar datos.'
 };
 
 /* ---------- Logout ---------- */
@@ -150,7 +150,7 @@ function renderToday() {
     })}`;
 }
 
-/* --- Add Habit (await saveHabits) --- */
+/* --- Add Habit --- */
 async function addHabit() {
   const name = habitInput.value.trim();
   if (!name) { alert('Escribe un hábito'); return; }
@@ -158,18 +158,18 @@ async function addHabit() {
   addHabitButton.disabled = true;
   createCard(name, descInput.value.trim(), todayISO(), []);
   habitInput.value = '';
-  descInput.value = '';
+  descInput.value  = '';
 
   try {
     await saveHabits();
   } catch (e) {
-    alert(`⚠️ No se pudo guardar en la nube (error: ${e.code || e.message}).`);
+    alert(`⚠️ Error guardando en nube (${e.code}). El hábito se mantiene localmente.`);
   }
 
   addHabitButton.disabled = false;
 }
 
-/* --- Create Habit Card --- */
+/* --- Create Card --- */
 function createCard(name, desc, iso, completed = []) {
   const card = document.createElement('div');
   card.className = 'habit';
@@ -179,7 +179,7 @@ function createCard(name, desc, iso, completed = []) {
   h3.textContent = name;
   h3.ondblclick = () => editInline(h3, 'Nuevo nombre');
 
-  // Description paragraph
+  // Description
   let descP = null;
   if (desc) {
     descP = document.createElement('p');
@@ -188,7 +188,7 @@ function createCard(name, desc, iso, completed = []) {
     descP.ondblclick = () => editInline(descP, 'Nueva descripción');
   }
 
-  // Header with buttons
+  // Header
   const header = document.createElement('header');
   header.appendChild(h3);
   header.appendChild(btn('Editar título', 'edit-btn',
@@ -204,13 +204,13 @@ function createCard(name, desc, iso, completed = []) {
   // Days grid
   const grid = document.createElement('div');
   grid.className = 'days';
-  const start    = fromISO(iso);
-  const passed   = Math.floor((dateOnly(new Date()) - start) / 86400000);
+  const start  = fromISO(iso);
+  const passed = Math.floor((dateOnly(new Date()) - start) / 86400000);
   for (let i = 1; i <= 40; i++) {
     const cell = document.createElement('span');
     cell.className = 'day' + (i === 21 ? ' milestone' : '');
     cell.textContent = i;
-    if (i - 1 > passed) cell.classList.add('disabled');
+    if (i - 1 > passed)       cell.classList.add('disabled');
     if (completed.includes(i)) cell.classList.add('completed');
     cell.onclick = () => {
       if (cell.classList.contains('disabled')) return;
@@ -258,7 +258,7 @@ function editInline(el, msg) {
 }
 
 /******************************************************************
-*  Hybrid Persistence (Firestore + localStorage)
+*  Persist to Firestore (remove local backup on success)
 ******************************************************************/
 async function saveHabits() {
   const arr = [];
@@ -272,34 +272,39 @@ async function saveHabits() {
     arr.push({ name, desc, isoStart: iso, completed: comp });
   });
 
-  // 1) Try saving to Firestore
+  // Try Firestore
   await db.collection('users').doc(uid)
           .set({ profile: {}, habits: arr }, { merge: true });
 
-  // 2) On success remove localStorage backup
+  // On success, clear local backup
   localStorage.removeItem(LSKEY);
 }
 
+/******************************************************************
+*  Load from Firestore or localStorage fallback
+******************************************************************/
 async function loadHabits() {
-  // First try Firestore
+  // Firestore first
   try {
     const snap = await db.collection('users').doc(uid).get();
     if (snap.exists && Array.isArray(snap.data().habits)) {
       snap.data().habits.forEach(h =>
-        createCard(h.name, h.desc, h.isoStart, Array.isArray(h.completed) ? h.completed : [])
+        createCard(h.name, h.desc, h.isoStart,
+                   Array.isArray(h.completed) ? h.completed : [])
       );
       return;
     }
   } catch (e) {
-    console.warn('Firestore unavailable, falling back to localStorage', e);
+    console.warn('Firestore error, loading local backup', e);
   }
 
-  // Then localStorage
+  // Fallback to localStorage
   const raw = localStorage.getItem(LSKEY);
   if (raw) {
     try {
       JSON.parse(raw).forEach(h =>
-        createCard(h.name, h.desc, h.isoStart, Array.isArray(h.completed) ? h.completed : [])
+        createCard(h.name, h.desc, h.isoStart,
+                   Array.isArray(h.completed) ? h.completed : [])
       );
     } catch (e) {
       console.error('LocalStorage backup corrupt', e);
