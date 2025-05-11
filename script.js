@@ -119,6 +119,7 @@ const fromISO = s => {
 *  Habit Tracker
 ******************************************************************/
 let habitInput, descInput, list, addHabitButton;
+
 function initApp() {
   habitInput     = document.getElementById('habitInput');
   descInput      = document.getElementById('descInput');
@@ -163,46 +164,73 @@ async function addHabit() {
   try {
     await saveHabits();
   } catch (e) {
-    alert(`⚠️ No se pudo guardar en la nube (code: ${e.code}).` +
-          `\nSe mantiene localmente.`);
+    alert(`⚠️ No se pudo guardar en la nube (code: ${e.code}).\nSe mantiene localmente.`);
   }
 
   addHabitButton.disabled = false;
 }
 
-/* --- Create Card --- */
+/* --- Create Card con botón Unificado “Editar” --- */
 function createCard(name, desc, iso, completed = []) {
   const card = document.createElement('div');
   card.className = 'habit';
 
-  // Title
+  // Título
   const h3 = document.createElement('h3');
   h3.textContent = name;
-  h3.ondblclick = () => editInline(h3, 'Nuevo nombre');
 
-  // Description
+  // Descripción
   let descP = null;
   if (desc) {
     descP = document.createElement('p');
     descP.className = 'desc';
     descP.textContent = desc;
-    descP.ondblclick = () => editInline(descP, 'Nueva descripción');
   }
 
   // Header
   const header = document.createElement('header');
   header.appendChild(h3);
-  header.appendChild(btn('Editar título', 'edit-btn',
-    () => editInline(h3, 'Nuevo nombre')));
-  header.appendChild(btn('Editar desc.', 'edit-btn',
-    () => editInline(descP || createDesc(card), 'Nueva descripción')));
-  header.appendChild(btn('Eliminar', 'delete-btn',
-    () => { card.remove(); saveHabits(); }));
-  card.appendChild(header);
 
+  // Botón Unificado Editar
+  const editBtn = document.createElement('button');
+  editBtn.className = 'edit-btn';
+  editBtn.textContent = 'Editar';
+  editBtn.onclick = () => {
+    // Editar título
+    const newTitle = prompt('Nuevo nombre:', h3.textContent);
+    if (newTitle && newTitle.trim()) {
+      h3.textContent = newTitle.trim();
+    }
+    // Asegurar párrafo de descripción
+    if (!descP) {
+      descP = document.createElement('p');
+      descP.className = 'desc';
+      descP.textContent = '';
+      card.appendChild(descP);
+    }
+    // Editar descripción
+    const newDesc = prompt('Nueva descripción:', descP.textContent);
+    if (newDesc !== null) {
+      descP.textContent = newDesc.trim();
+    }
+    saveHabits();
+  };
+  header.appendChild(editBtn);
+
+  // Botón Eliminar
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'delete-btn';
+  deleteBtn.textContent = 'Eliminar';
+  deleteBtn.onclick = () => {
+    card.remove();
+    saveHabits();
+  };
+  header.appendChild(deleteBtn);
+
+  card.appendChild(header);
   if (descP) card.appendChild(descP);
 
-  // Days grid
+  // Grid de días
   const grid = document.createElement('div');
   grid.className = 'days';
   const start  = fromISO(iso);
@@ -222,7 +250,7 @@ function createCard(name, desc, iso, completed = []) {
   }
   card.appendChild(grid);
 
-  // Start date
+  // Fecha de inicio
   const info = document.createElement('p');
   info.dataset.iso = iso;
   const [y,m,d] = iso.split('-');
@@ -233,42 +261,13 @@ function createCard(name, desc, iso, completed = []) {
   list.prepend(card);
 }
 
-function createDesc(card) {
-  const p = document.createElement('p');
-  p.className = 'desc';
-  p.textContent = '';
-  card.insertBefore(p, card.querySelector('.days'));
-  return p;
-}
-
-function btn(text, cls, fn) {
-  const b = document.createElement('button');
-  b.className = cls;
-  b.textContent = text;
-  b.onclick = fn;
-  return b;
-}
-
-function editInline(el, msg) {
-  if (!el) return;
-  const v = prompt(msg, el.textContent);
-  if (v && v.trim()) {
-    el.textContent = v.trim();
-    saveHabits();
-  }
-}
-
-/******************************************************************
-*  Persist to Firestore (remove local backup on success)
-******************************************************************/
+/* --- Persist to Firestore (y localStorage si falla) --- */
 async function saveHabits() {
-  // 1) Construye el array de hábitos
   const arr = [];
   document.querySelectorAll('.habit').forEach(card => {
     const name  = card.querySelector('h3').textContent;
     const descE = card.querySelector('p.desc');
     const desc  = descE ? descE.textContent : '';
-    // Aquí sólo buscamos el <p> que lleva data-iso
     const isoP  = card.querySelector('p[data-iso]');
     const iso   = isoP ? isoP.dataset.iso : '';
     const comp  = [];
@@ -276,32 +275,21 @@ async function saveHabits() {
     arr.push({ name, desc, isoStart: iso, completed: comp });
   });
 
-  // 2) Muestra en consola el array que vamos a enviar
-  console.log('🚀 Intentando guardar este array en Firestore:', arr);
+  // Backup local
+  localStorage.setItem(LSKEY, JSON.stringify(arr));
 
   try {
-    // 3) Intento de guardado en Firestore
+    // Guardar en Firestore
     await db.collection('users').doc(uid)
             .set({ profile: {}, habits: arr }, { merge: true });
-    // 4) Si todo sale bien, borramos el backup local
     localStorage.removeItem(LSKEY);
   } catch (e) {
-    console.error('🔥 Firestore saving failed:', {
-      code:    e.code,
-      message: e.message,
-      stack:   e.stack
-    });
-    alert(`⚠️ No se pudo guardar en la nube (code: ${e.code}).  
-Mira la consola (F12 → Console) y copia aquí el “message” completo.`);
+    console.error('Firestore saving failed:', e);
     throw e;
   }
 }
 
-
-
-/******************************************************************
-*  Load from Firestore or localStorage fallback
-******************************************************************/
+/* --- Load from Firestore or local fallback --- */
 async function loadHabits() {
   try {
     const snap = await db.collection('users').doc(uid).get();
@@ -313,7 +301,7 @@ async function loadHabits() {
       return;
     }
   } catch (e) {
-    console.warn('Firestore error, cargar local fallback →', e);
+    console.warn('Firestore error, loading from localStorage →', e);
   }
 
   const raw = localStorage.getItem(LSKEY);

@@ -16,7 +16,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
-
   <script>
     firebase.initializeApp({
       apiKey:            "AIzaSyD8xjRRUWma1JaoHouiCZIi7XghUykc_vw",
@@ -27,6 +26,7 @@
       appId:             "1:569699375413:web:94b80bd879a1db77cf147c"
     });
   </script>
+
   <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -37,10 +37,10 @@
 </head>
 
 <body>
-  <!-- Google Tag Manager (noscript) -->
-  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PXMTK3B6"
-  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-  <!-- End Google Tag Manager (noscript) -->
+  <noscript>
+    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PXMTK3B6"
+            height="0" width="0" style="display:none;visibility:hidden"></iframe>
+  </noscript>
 
   <!-- Hero de bienvenida -->
   <header class="hero">
@@ -53,27 +53,21 @@
   <div id="modal" class="modal hidden">
     <div class="modal-content">
       <span id="closeModal" class="close">&times;</span>
-
       <div class="tabs">
         <button id="tabLogin" class="tab active">Iniciar sesión</button>
         <button id="tabReg"   class="tab">Crear cuenta</button>
       </div>
-
-      <!-- Pane login -->
       <div id="loginPane" class="pane">
         <input id="loginEmail" type="email" placeholder="Correo" />
         <input id="loginPass"  type="password" placeholder="Contraseña" />
         <button id="loginBtn"  class="add-habit-btn full">Entrar</button>
       </div>
-
-      <!-- Pane registro -->
       <div id="regPane" class="pane hidden">
         <input id="regName"  type="text"  placeholder="Tu nombre" />
         <input id="regEmail" type="email" placeholder="Correo" />
         <input id="regPass"  type="password" placeholder="Contraseña (mín. 6)" />
         <button id="regBtn"  class="add-habit-btn full">Registrar</button>
       </div>
-
       <p id="authMsg" class="auth-msg"></p>
     </div>
   </div>
@@ -111,7 +105,8 @@
            3.&nbsp;Celebra al llegar al día 21 🎉.<br>
            4.&nbsp;Continúa hasta los <strong>40 días</strong> para reforzarlo.<br>
            5.&nbsp;¡Puedes crear y rastrear tantos hábitos como quieras!</p>
-        <p>La disciplina diaria genera progreso constante. ¿Sugerencias? ¡Escríbeme! 😊</p>
+        <p>Si no lo completas un día, no te preocupes. No es el fin del mundo. Puedes volver a empezar desde el día 1 o seguir desde donde lo dejaste. Lo importante es que sigas intentándolo.</p>
+        <p>¿Te gusta esta iniciativa? ¿Sugerencias o problemas al usarlo? ¡Escríbeme! 😊</p>
       </div>
     </section>
 
